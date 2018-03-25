@@ -1,0 +1,61 @@
+import java.net.InetAddress;
+import java.net.DatagramSocket;
+import java.net.DatagramPacket;
+import java.net.UnknownHostException;
+import java.net.SocketTimeoutException;
+
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.ImageIcon;
+
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.ByteArrayInputStream;
+
+public class Client {
+	private static final int PORT = 2703;
+	private static final String HOST = "pi.cs.oswego.edu";
+	private static final String link = "http://www.smashbros.com/images/og/link.jpg";
+	private static InetAddress address;
+	private static DatagramSocket connection;
+	
+	public static void main(String[] args){
+		try {
+			connection = new DatagramSocket();
+			//address = InetAddress.getByName(HOST);
+			address = InetAddress.getLocalHost();
+
+			byte[] bytes = link.getBytes("UTF-8");
+			DatagramPacket packet = new DatagramPacket(bytes, bytes.length, address, PORT);
+			connection.send(packet);
+			
+			int len = 0;
+			
+			DatagramPacket reply = new DatagramPacket(replyBytes, replyBytes.length);
+			connection.receive(reply);
+			display(reply.getData());
+
+			connection.close();
+		} catch (IOException ex){
+			ex.printStackTrace();
+		}
+	}
+
+
+	private static void display(byte[] bytes) throws IOException {
+		BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
+		JFrame frame = new JFrame();
+		ImageIcon icon = new ImageIcon(img);
+		JLabel lbl = new JLabel();
+		lbl.setIcon(icon);
+		frame.add(lbl);
+		frame.setSize(1500, 1500);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+	}
+}
