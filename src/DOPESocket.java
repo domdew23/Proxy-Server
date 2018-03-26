@@ -3,6 +3,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 
+import java.io.IOException;
+
 /*
 A packet less than 512 (Max bytes per packet) signals termination of transfer
 If packet is dropped, intended recipiant times out and retransmit last packet (data or ack)
@@ -18,26 +20,29 @@ Each packet has associated with it the source TID and dest TID - handed to UDP a
 */
 public class DOPESocket {
 	
-	private int PORT;
-	private InetAddress ADDRESS;
+	private int port;
+	private InetAddress address;
 	private DatagramSocket connection;
-	private DatagramPacket[] packets;
+	private DOPEPacket[] packets;
 	private char currentSeqNum;
+	private boolean addressSet;
 
-	public DOPESocket(int port, InetAddress address){
-		this.PORT = port;
-		this.ADDRESS = address;
-		this.connection = new DatagramSocket(PORT);
+	public DOPESocket(int port, InetAddress address) throws IOException {
+		this.port = port;
+		this.address = address;
+		this.addressSet = true;
+		this.connection = new DatagramSocket(port);
 	}
 
-	public DOPESocket(int port){
-		this.PORT = port;
-		this.connection = new DatagramSocket(PORT);
+	public DOPESocket(int port) throws IOException {
+		this.port = port;
+		this.addressSet = false;
+		this.connection = new DatagramSocket(port);
 	}
 
-	public void sendStopAndWait(DOPEPacket packet){
-		byte[] bytes = packet.makePacket().getPacket();
-		DatagramPacket dgPacket = new DatagramPacket(bytes, bytes.length, ADDRESS, PORT);
+	public void sendStopAndWait(DOPEPacket packet) throws IOException {
+		byte[] bytes = packet.getPacket();
+		DatagramPacket dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
 		connection.send(dgPacket);
 	}
 
@@ -45,14 +50,19 @@ public class DOPESocket {
 
 	}
 
-	public DOPEPacket receiveStopAndWait(){
+	public DOPEPacket receiveStopAndWait() throws IOException {
 		byte[] packet = new byte[Control.MAX_PACKET_LENGTH];
 		DatagramPacket dgPacket = new DatagramPacket(packet, packet.length);
+		
+		if (!addressSet) {
+			address = dgPacket.getAddress();
+			addressSet = true;
+		}
 		connection.receive(dgPacket);
-		return dopePacket;
+		return (new DOPEPacket(packet));
 	}
 
-	public void beginTransferStopAndWait(DOPEPacket requestPacket){
+	public void beginTransferStopAndWait(DOPEPacket requestPacket) throws IOException {
 		/* send first data packet to client */
 		byte[] bytes = Control.getImage(requestPacket);
 		packets = Control.split(bytes);
@@ -60,11 +70,11 @@ public class DOPESocket {
 		sendStopAndWait(packets[currentSeqNum - 1]);
 	}
 
-	public void continueTransferServer(DOPEPacket ackPacket){
+	public void continueTransferServer(DOPEPacket ackPacket) throws IOException {
 		if (Control.slidingWindow){
 
 		} else {
-			if (currentSeqNum == ackPacket.getSeqNum()){
+			if (currentSeqNum == ackPacket.getSequenceNumber()){
 				/* recieved next packet in the chain */
 				currentSeqNum++;
 				sendStopAndWait(packets[currentSeqNum - 1]);
@@ -78,5 +88,13 @@ public class DOPESocket {
 
 	public void receiveSlidingWindow(DOPEPacket packet){
 
+	}
+
+	public void setAddress(InetAddress address){
+		this.address = address;
+	}
+
+	public void close() throws IOException {
+		connection.close();
 	}
 }

@@ -26,21 +26,31 @@ public class Client {
 	
 	public static void main(String[] args){
 		try {
-			connection = new DatagramSocket();
 			//address = InetAddress.getByName(HOST);
 			address = InetAddress.getLocalHost();
 
-			byte[] bytes = link.getBytes("UTF-8");
-			DatagramPacket packet = new DatagramPacket(bytes, bytes.length, address, PORT);
-			connection.send(packet);
-			
-			int len = 0;
-			
-			DatagramPacket reply = new DatagramPacket(replyBytes, replyBytes.length);
-			connection.receive(reply);
-			display(reply.getData());
+			DOPESocket connection = new DOPESocket(PORT, address);
 
+			byte[] linkBytes = link.getBytes("UTF-8");
+			DOPEPacket request = new DOPEPacket(Control.RQ_OP_CODE, linkBytes);
+			connection.sendStopAndWait(request);
+
+			DOPEPacket packet;
+			byte[] buffer = new byte[Control.MAX_SIZE_IPV4];
+			byte[] bytes = new byte[0];
+			
+			while ((packet = connection.receiveStopAndWait()).getDataLength() > Control.MAX_SIZE_IPV4){
+				byte[] tempBuffer = new byte[bytes.length + packet.getDataLength()];
+				System.arraycopy(bytes, 0, tempBuffer, 0, bytes.length);
+				System.arraycopy(buffer, 0, tempBuffer, bytes.length, packet.getDataLength());
+				bytes = tempBuffer;
+				DOPEPacket ack = new DOPEPacket(Control.ACK_OP_CODE, packet.getSequenceNumber());
+				connection.sendStopAndWait(ack);
+			}
+
+			display(bytes);
 			connection.close();
+
 		} catch (IOException ex){
 			ex.printStackTrace();
 		}
