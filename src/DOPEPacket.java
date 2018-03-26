@@ -11,12 +11,14 @@ public class DOPEPacket {
 	private byte[] header;
 	private byte[] seqNumBytes;
 	private byte[] lenBytes;
+	private byte[] opCodeBytes;
 	private byte[] data;
 	private byte[] packet;
-	private short seqNum;
+	private char seqNum;
 	private int length;
+	private byte opCode;
 
-	public DOPEPacket(byte[] data, short seqNum, int length){
+	public DOPEPacket(byte[] data, char seqNum, int length){
 		/* used by sender to wrap packet */
 		this.data = data;
 		this.seqNum = seqNum;
@@ -24,6 +26,47 @@ public class DOPEPacket {
 		this.header = new byte[seqNum];
 		this.packet = new byte[header.length + data.length];
 		addHeader(seqNum, length);
+		makePacket();
+	}
+
+	public DOPEPacket(byte[] data, int length){
+		/* used by sender to wrap packet */
+		this.data = data;
+		this.seqNum = 0;
+		this.length = length;
+		this.header = new byte[seqNum];
+		this.packet = new byte[header.length + data.length];
+		addHeader(seqNum, length);
+		makePacket();
+	}
+
+	public DOPEPacket(byte opCode, char seqNum, byte[] data){
+		/* make a new data packet */
+		this.opCode = opCode;
+		this.seqNum = seqNum;
+		this.data = data;
+		this.header = new byte[Byte.SIZE + Char.SIZE];
+		this.packet = new byte[header.length + data.length];
+		addHeader(opCode, seqNum);
+		makeDataPacket();
+	}
+
+	public DOPEPacket(byte opCode, byte[] data){
+		/* make a new request packet */
+		this.opCode = opCode;
+		this.data = data;
+		this.header = new byte[Byte.SIZE];
+		this.packet = new byte[header.length + data.length];
+		addHeader(opCode);
+		makeRequestPacket();
+	}
+
+	public DOPEPacket(byte opCode, char seqNum){
+		/* make a new ack packet */
+		this.opCode = opCode;
+		this.seqNum = seqNum;
+		this.packet = new byte[Byte.SIZE + Char.SIZE];
+		makeAckPacket();
 	}
 
 	public DOPEPacket(byte[] packet){
@@ -38,16 +81,32 @@ public class DOPEPacket {
 		this.length = ByteBuffer.wrap(lenBytes).getInt();
 	}
 
-	public void addHeader(short seqNum, int len){
-		this.seqNumBytes = ByteBuffer.allocate(Short.SIZE).putShort(seqNum).array();
-		this.lenBytes = ByteBuffer.allocate(Integer.SIZE).putInt(len).array();
+	public void addHeader(byte opCode, char seqNum){
+		this.seqNumBytes = ByteBuffer.allocate(Char.SIZE).putShort(seqNum).array();
+		this.opCodeBytes = ByteBuffer.allocate(Byte.SIZE).putByte(opCode).array();
 		System.arraycopy(seqNumBytes, 0, header, 0, seqNumBytes.length);
-		System.arraycopy(lenBytes, 0, header, seqNumBytes.length, lenBytes.length);
+		System.arraycopy(opCodeBytes, 0, header, seqNumBytes.length, opCodeBytes.length);
 	}
 
-	public DOPEPacket makePacket(){
+	public void addHeader(byte opCode){
+		this.opCodeBytes = ByteBuffer.allocate(Byte.SIZE).putByte(opCode).array();	
+		System.arraycopy(opCodeBytes, 0, header, 0, opCodeBytes.length);
+	}
+
+	public DOPEPacket makeDataPacket(){
 		System.arraycopy(header, 0, packet, 0, header.length);
 		System.arraycopy(data, 0, packet, header.length, data.length);
+	}
+
+	public DOPEPacket makeRequestPacket(){
+		makeDataPacket();
+	}
+
+	public DOPEPacket makeAckPacket(){
+		this.seqNumBytes = ByteBuffer.allocate(Char.SIZE).putShort(seqNum).array();
+		this.opCodeBytes = ByteBuffer.allocate(Byte.SIZE).putByte(opCode).array();
+		System.arraycopy(seqNumBytes, 0, packet, 0, seqNumBytes.length);
+		System.arraycopy(opCodeBytes, 0, packet, seqNumBytes.length, opCodeBytes.length);
 	}
 
 	public byte[] getPacket(){
@@ -60,6 +119,10 @@ public class DOPEPacket {
 
 	public short getSequenceNumber(){
 		return seqNum;
+	}
+
+	public byte getOpcode(){
+		return opCode;
 	}
 
 	public byte[] getData(){
