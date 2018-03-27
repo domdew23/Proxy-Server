@@ -59,7 +59,7 @@ public class DOPEPacket {
 		ByteBuffer buffer = ByteBuffer.wrap(packet);
 		this.packet = packet;
 		this.header = buffer.get(packet, 0, HEADER_LENGTH).array();
-		this.data = buffer.get(packet, HEADER_LENGTH, packet.length).array();
+		this.data = buffer.get(packet, HEADER_LENGTH, packet.length - HEADER_LENGTH).array();
 
 		this.opCodeBytes = ByteBuffer.wrap(header).get(header, 0, BYTE_SIZE).array();
 		this.seqNumBytes = ByteBuffer.wrap(header).get(header, Byte.SIZE, CHAR_SIZE).array();

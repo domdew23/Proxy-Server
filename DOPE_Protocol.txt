@@ -1,0 +1,25 @@
+Opcodes:
+0 - Read Request
+1 - Data
+2 - Ack
+
+Request Packet:
+
+ 1 byte   n bytes
+ ---------------
+| Opcode | Link |
+ ---------------
+
+Data Packet (Stop and Wait):
+
+ 1 byte   2 bytes  n bytes
+ ------------------------
+| Opcode | SeqNum | Data |
+ ------------------------
+
+Ack Packet (Stop and Wait):
+ 
+ 1 byte   2 bytes
+ -----------------
+| Opcode | SeqNum |
+ -----------------

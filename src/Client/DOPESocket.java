@@ -18,6 +18,7 @@ Seq nums begin at 1
 Each end of connection chooes TID (Transfer identifier) for itself - should be random
 Each packet has associated with it the source TID and dest TID - handed to UDP as src and dest PORTS - used for remainder of transfer
 */
+
 public class DOPESocket {
 	
 	private int port;
@@ -31,7 +32,7 @@ public class DOPESocket {
 		this.port = port;
 		this.address = address;
 		this.addressSet = true;
-		this.connection = new DatagramSocket(port);
+		this.connection = new DatagramSocket(port, address);
 	}
 
 	public DOPESocket(int port) throws IOException {
@@ -58,6 +59,7 @@ public class DOPESocket {
 			address = dgPacket.getAddress();
 			addressSet = true;
 		}
+		
 		connection.receive(dgPacket);
 		return (new DOPEPacket(packet));
 	}

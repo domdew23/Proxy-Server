@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 
 public class Client {
-	private static final int PORT = 2703;
+	private static final int PORT = 9999;
 	private static final String HOST = "pi.cs.oswego.edu";
 	private static final String link = "http://www.smashbros.com/images/og/link.jpg";
 	private static InetAddress address;
@@ -26,14 +26,14 @@ public class Client {
 	
 	public static void main(String[] args){
 		try {
-			//address = InetAddress.getByName(HOST);
-			address = InetAddress.getLocalHost();
+			address = InetAddress.getByName(HOST);
 
 			DOPESocket connection = new DOPESocket(PORT, address);
 
 			byte[] linkBytes = link.getBytes("UTF-8");
 			DOPEPacket request = new DOPEPacket(Control.RQ_OP_CODE, linkBytes);
 			connection.sendStopAndWait(request);
+			System.out.println("Sent request.");
 
 			DOPEPacket packet;
 			byte[] buffer = new byte[Control.MAX_SIZE_IPV4];
@@ -49,13 +49,12 @@ public class Client {
 			}
 
 			display(bytes);
-			connection.close();
-
 		} catch (IOException ex){
 			ex.printStackTrace();
+		} finally {
+			connection.close();
 		}
 	}
-
 
 	private static void display(byte[] bytes) throws IOException {
 		BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
