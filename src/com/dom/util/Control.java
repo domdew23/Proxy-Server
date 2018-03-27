@@ -1,9 +1,13 @@
+package com.dom.util;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+
+import com.dom.dope.DOPEPacket;
 
 public class Control {
 	

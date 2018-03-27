@@ -1,9 +1,13 @@
+package com.dom.dope;
+
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 
 import java.io.IOException;
+
+import com.dom.util.Control;
 
 /*
 A packet less than 512 (Max bytes per packet) signals termination of transfer
@@ -31,14 +35,19 @@ public class DOPESocket {
 	public DOPESocket(int port, InetAddress address) throws IOException {
 		this.port = port;
 		this.address = address;
+		this.connection = new DatagramSocket();
 		this.addressSet = true;
-		this.connection = new DatagramSocket(port, address);
 	}
 
 	public DOPESocket(int port) throws IOException {
 		this.port = port;
 		this.addressSet = false;
 		this.connection = new DatagramSocket(port);
+	}
+
+	public DOPESocket(InetAddress address) throws IOException {
+		this.connection = new DatagramSocket();
+		this.address = address;
 	}
 
 	public void sendStopAndWait(DOPEPacket packet) throws IOException {
@@ -52,7 +61,7 @@ public class DOPESocket {
 	}
 
 	public DOPEPacket receiveStopAndWait() throws IOException {
-		byte[] packet = new byte[Control.MAX_PACKET_LENGTH];
+		byte[] packet = new byte[43 + DOPEPacket.HEADER_LENGTH];//Control.MAX_PACKET_LENGTH]; /* change to length of data + header length */
 		DatagramPacket dgPacket = new DatagramPacket(packet, packet.length);
 		
 		if (!addressSet) {

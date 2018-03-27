@@ -1,8 +1,14 @@
+package com.dom.client;
+
 import java.net.InetAddress;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.net.UnknownHostException;
 import java.net.SocketTimeoutException;
+
+import com.dom.dope.DOPEPacket;
+import com.dom.dope.DOPESocket;
+import com.dom.util.Control;
 
 import javax.swing.JLabel;
 import javax.swing.JFrame;
@@ -18,8 +24,8 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 
 public class Client {
-	private static final int PORT = 9999;
-	private static final String HOST = "pi.cs.oswego.edu";
+	private static final int PORT = 2703;
+	private static final String HOST = "rho.cs.oswego.edu";//"129.3.20.24";
 	private static final String link = "http://www.smashbros.com/images/og/link.jpg";
 	private static InetAddress address;
 	private static DatagramSocket connection;
@@ -29,9 +35,14 @@ public class Client {
 			address = InetAddress.getByName(HOST);
 
 			DOPESocket connection = new DOPESocket(PORT, address);
+			System.out.println("Created connection.");
 
 			byte[] linkBytes = link.getBytes("UTF-8");
+			System.out.println("Sending link: " + new String(linkBytes) + " | size: " + linkBytes.length);
+
 			DOPEPacket request = new DOPEPacket(Control.RQ_OP_CODE, linkBytes);
+
+			System.out.println("Sending packet: " + new String(request.getPacket()) + " | size: " + request.getPacketLength());
 			connection.sendStopAndWait(request);
 			System.out.println("Sent request.");
 

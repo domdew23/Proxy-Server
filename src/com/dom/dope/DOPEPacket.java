@@ -1,3 +1,5 @@
+package com.dom.dope;
+
 import java.nio.ByteBuffer;
 import java.net.DatagramPacket;
 
@@ -40,8 +42,9 @@ public class DOPEPacket {
 	public DOPEPacket(byte opCode, byte[] data){
 		this.opCode = opCode;
 		this.data = data;
-		this.header = new byte[Byte.SIZE];
+		this.header = new byte[HEADER_LENGTH];
 		this.packet = new byte[header.length + data.length];
+		System.out.println("CHAR_SIZE: " + CHAR_SIZE + " | BYTE_SIZE: " + BYTE_SIZE + " | HEADER_LENGTH: " + header.length + " | DATA_LENGTH: " + data.length);
 		addHeader(opCode);
 		makeRequestPacket();
 	}
