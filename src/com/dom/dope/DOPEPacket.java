@@ -2,6 +2,7 @@ package com.dom.dope;
 
 import java.nio.ByteBuffer;
 import java.net.DatagramPacket;
+import java.util.Arrays;
 
 /* Dom's Original Protocol Extended */
 
@@ -41,10 +42,10 @@ public class DOPEPacket {
 	/* make a new request packet */
 	public DOPEPacket(byte opCode, byte[] data){
 		this.opCode = opCode;
+		this.seqNum = 0;
 		this.data = data;
 		this.header = new byte[HEADER_LENGTH];
 		this.packet = new byte[header.length + data.length];
-		System.out.println("CHAR_SIZE: " + CHAR_SIZE + " | BYTE_SIZE: " + BYTE_SIZE + " | HEADER_LENGTH: " + header.length + " | DATA_LENGTH: " + data.length);
 		addHeader(opCode);
 		makeRequestPacket();
 	}
@@ -59,29 +60,44 @@ public class DOPEPacket {
 
 	/* used by reciever to unwrap packet */	
 	public DOPEPacket(byte[] packet){
-		ByteBuffer buffer = ByteBuffer.wrap(packet);
+		//ByteBuffer buffer = ByteBuffer.wrap(packet);
 		this.packet = packet;
-		this.header = buffer.get(packet, 0, HEADER_LENGTH).array();
-		this.data = buffer.get(packet, HEADER_LENGTH, packet.length - HEADER_LENGTH).array();
+		//this.header = buffer.get(packet, 0, HEADER_LENGTH).array();
+		//this.data = buffer.get(packet, HEADER_LENGTH, packet.length - HEADER_LENGTH).array();
+		this.header = Arrays.copyOfRange(packet, 0, HEADER_LENGTH);
+		this.data = Arrays.copyOfRange(packet, HEADER_LENGTH, packet.length);
+		this.opCodeBytes = Arrays.copyOfRange(header, 0, BYTE_SIZE);
+		this.seqNumBytes = Arrays.copyOfRange(header, BYTE_SIZE, header.length);
 
-		this.opCodeBytes = ByteBuffer.wrap(header).get(header, 0, BYTE_SIZE).array();
-		this.seqNumBytes = ByteBuffer.wrap(header).get(header, Byte.SIZE, CHAR_SIZE).array();
+		System.out.println("Data len: " + data.length);
+
+		//ByteBuffer.wrap(header).get(opCodeBytes, 0, BYTE_SIZE).array();
+		//ByteBuffer.wrap(header).get(seqNumBytes, BYTE_SIZE, CHAR_SIZE).array();
 		this.seqNum = ByteBuffer.wrap(seqNumBytes).getChar();
-		this.opCode = ByteBuffer.wrap(opCodeBytes).get();
+		this.opCode = opCodeBytes[0];//ByteBuffeir.wrap(opCodeBytes).get();
 	}
 
 	/* add header to data packets*/
 	public void addHeader(byte opCode, char seqNum){
-		this.seqNumBytes = ByteBuffer.allocate(CHAR_SIZE).putChar(seqNum).array();
-		this.opCodeBytes = ByteBuffer.allocate(BYTE_SIZE).put(opCode).array();
-		System.arraycopy(seqNumBytes, 0, header, 0, seqNumBytes.length);
-		System.arraycopy(opCodeBytes, 0, header, seqNumBytes.length, opCodeBytes.length);
+		ByteBuffer buffer = ByteBuffer.allocate(BYTE_SIZE + CHAR_SIZE);
+		buffer.put(opCode);
+		buffer.putChar(seqNum);
+
+		buffer.get(header, 0, BYTE_SIZE);
+		buffer.get(header, BYTE_SIZE, CHAR_SIZE);
+		//this.seqNumBytes = ByteBuffer.allocate(CHAR_SIZE).putChar(seqNum).array();
+		//this.opCodeBytes = ByteBuffer.allocate(BYTE_SIZE).put(opCode).array();
+		//System.arraycopy(seqNumBytes, 0, header, 0, seqNumBytes.length);
+		//System.arraycopy(opCodeBytes, 0, header, seqNumBytes.length, opCodeBytes.length);
 	}
 
 	/* add header to request packets */
 	public void addHeader(byte opCode){
-		this.opCodeBytes = ByteBuffer.allocate(BYTE_SIZE).put(opCode).array();	
-		System.arraycopy(opCodeBytes, 0, header, 0, opCodeBytes.length);
+		ByteBuffer buffer = ByteBuffer.allocate(HEADER_LENGTH);
+		buffer.mark();
+		buffer.put(opCode);
+		buffer.putChar(seqNum).reset();
+		buffer.get(header);
 	}
 
 	public void makeDataPacket(){
@@ -94,10 +110,11 @@ public class DOPEPacket {
 	}
 
 	public void makeAckPacket(){
-		this.seqNumBytes = ByteBuffer.allocate(CHAR_SIZE).putChar(seqNum).array();
-		this.opCodeBytes = ByteBuffer.allocate(BYTE_SIZE).put(opCode).array();
-		System.arraycopy(seqNumBytes, 0, packet, 0, seqNumBytes.length);
-		System.arraycopy(opCodeBytes, 0, packet, seqNumBytes.length, opCodeBytes.length);
+		ByteBuffer buffer = ByteBuffer.allocate(HEADER_LENGTH);
+		buffer.mark();
+		buffer.put(opCode);
+		buffer.putChar(seqNum).reset();
+		buffer.get(packet);
 	}
 
 	public byte[] getPacket(){
@@ -126,5 +143,9 @@ public class DOPEPacket {
 
 	public byte[] getHeader(){
 		return header;
+	}
+
+	public String toString(){
+		return "Packet:\nOpcode: " + opCode + "\nSequence Number: " + (int) seqNum;
 	}
 }

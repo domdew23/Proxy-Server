@@ -8,6 +8,7 @@ import java.net.SocketTimeoutException;
 import java.io.IOException;
 
 import com.dom.util.Control;
+import java.util.Arrays;
 
 /*
 A packet less than 512 (Max bytes per packet) signals termination of transfer
@@ -25,7 +26,7 @@ Each packet has associated with it the source TID and dest TID - handed to UDP a
 
 public class DOPESocket {
 	
-	private int port;
+	private int port, senderPort;
 	private InetAddress address;
 	private DatagramSocket connection;
 	private DOPEPacket[] packets;
@@ -33,6 +34,7 @@ public class DOPESocket {
 	private boolean addressSet;
 
 	public DOPESocket(int port, InetAddress address) throws IOException {
+		/* new client socket */
 		this.port = port;
 		this.address = address;
 		this.connection = new DatagramSocket();
@@ -41,8 +43,8 @@ public class DOPESocket {
 
 	public DOPESocket(int port) throws IOException {
 		this.port = port;
-		this.addressSet = false;
 		this.connection = new DatagramSocket(port);
+		this.addressSet = false;
 	}
 
 	public DOPESocket(InetAddress address) throws IOException {
@@ -52,8 +54,10 @@ public class DOPESocket {
 
 	public void sendStopAndWait(DOPEPacket packet) throws IOException {
 		byte[] bytes = packet.getPacket();
+		System.out.println("Sending " + bytes.length + " bytes.");
 		DatagramPacket dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
 		connection.send(dgPacket);
+		System.out.println("Packet sent.");
 	}
 
 	public void sendSlidingWindow(DOPEPacket packet){
@@ -61,15 +65,19 @@ public class DOPESocket {
 	}
 
 	public DOPEPacket receiveStopAndWait() throws IOException {
-		byte[] packet = new byte[43 + DOPEPacket.HEADER_LENGTH];//Control.MAX_PACKET_LENGTH]; /* change to length of data + header length */
-		DatagramPacket dgPacket = new DatagramPacket(packet, packet.length);
+		byte[] buffer = new byte[515];//43 + DOPEPacket.HEADER_LENGTH];//Control.MAX_PACKET_LENGTH]; /* change to length of data + header length */
+		DatagramPacket dgPacket = new DatagramPacket(buffer, buffer.length);
+		connection.receive(dgPacket);
+
+		byte[] packet = Arrays.copyOfRange(buffer, 0, dgPacket.getLength());
 		
+		System.out.println("Received packet of size: " + dgPacket.getLength());
 		if (!addressSet) {
 			address = dgPacket.getAddress();
+			senderPort = dgPacket.getPort();
 			addressSet = true;
+			System.out.println("Set address.");
 		}
-		
-		connection.receive(dgPacket);
 		return (new DOPEPacket(packet));
 	}
 

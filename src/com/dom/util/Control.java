@@ -15,7 +15,7 @@ public class Control {
 	public static final byte DATA_OP_CODE = 1;
 	public static final byte ACK_OP_CODE = 2;
 
-	public static final int MAX_SIZE_IPV4 = 2 ^ 16;
+	public static final int MAX_SIZE_IPV4 = 512;
 	public static final long MAX_SIZE_IPV6 = (2 ^ 32) - 1;
 	public static final int MAX_PACKET_LENGTH = MAX_SIZE_IPV4 - DOPEPacket.HEADER_LENGTH;
 	public static boolean IPv4 = true;
@@ -28,7 +28,8 @@ public class Control {
 
 	public static byte[] getImage(DOPEPacket packet){
 		byte[] linkBytes = packet.getData();
-		String link = new String(linkBytes);
+		String link = new String(linkBytes).trim();
+		System.out.println("Received link: " + link);
 
 		try {
 			URL url = new URL(link);
@@ -74,7 +75,7 @@ public class Control {
 
 	public static DOPEPacket[] split(byte[] bytes){
 		int packetCount = 0;
-		long max = 0;
+		/*long max = 0;
 
 		if (IPv4) {
 			packetCount = (int) Math.ceil((double) bytes.length / MAX_SIZE_IPV4);
@@ -82,20 +83,30 @@ public class Control {
 		} else {
 			packetCount = (int) Math.ceil((double) bytes.length / MAX_SIZE_IPV6); 
 			max = MAX_SIZE_IPV6;
-		}
+		}*/
+
+		int max = MAX_SIZE_IPV4;
+		packetCount = (int) Math.ceil((double) bytes.length / max);
 
 		DOPEPacket[] packets = new DOPEPacket[packetCount];
 		char seqNum = 1;
-		for (int i = 0; i < packetCount; i+=max, seqNum++){
+		for (int offset = 0,bytesLeft=bytes.length; (int) seqNum < packetCount + 1; offset+=max, seqNum++){
 			byte[] data;
-			if (bytes.length - max >= max){
-				data = Arrays.copyOfRange(bytes, i, (int) max);
+			if (bytesLeft <= max){
+				/* last packet */
+				data = new byte[bytesLeft];
+				data = Arrays.copyOfRange(bytes, offset, offset + bytesLeft);
+				bytesLeft = 0;
 			} else {
-				data = Arrays.copyOfRange(bytes, i, bytes.length);
+				/* not last packet */
+				data = new byte[max];
+				data = Arrays.copyOfRange(bytes, offset, offset + max);
+				bytesLeft -= max;
 			}
 			DOPEPacket dopePacket = new DOPEPacket(DATA_OP_CODE, seqNum, data);
 			packets[seqNum - 1] = dopePacket;
 		}
+		System.out.println("Split packets (" + packets.length + ").");
 		return packets;
 	}
 }

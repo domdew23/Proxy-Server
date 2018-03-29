@@ -1,4 +1,10 @@
-javac -d bin src/com/dom/dope/*.java
-javac -d bin src/com/dom/util/*.java
-javac -d bin src/com/dom/client/*.java
-javac -d bin src/com/dom/server/*.java
+@echo off
+
+cd src
+javac -d ../bin com/dom/dope/*.java
+javac -d ../bin com/dom/util/*.java
+javac -d ../bin com/dom/client/*.java
+javac -d ../bin com/dom/server/*.java
+cd ..
+
+echo Built.

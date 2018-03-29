@@ -26,9 +26,9 @@ public class Server {
 	            
 				switch (packet.getOpcode()){
 					/* read request packet */
-					case 0: connection.beginTransferStopAndWait(packet); break;
+					case 0: System.out.println("Got request packet."); connection.beginTransferStopAndWait(packet); break;
 					/* ack packet */
-					case 2: connection.continueTransferServer(packet); break; 
+					case 2: System.out.println("Got ack packet."); connection.continueTransferServer(packet); break; 
 				}
 			}
 		} catch (IOException ex){
