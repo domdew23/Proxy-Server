@@ -1,1 +1,1 @@
-java -cp bin com.dom.client.Client
+java -Djava.net.preferIPv4Stack=true -cp bin com.dom.client.Client
