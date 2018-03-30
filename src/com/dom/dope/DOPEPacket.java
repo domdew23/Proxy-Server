@@ -60,9 +60,20 @@ public class DOPEPacket {
 
 	/* used by reciever to unwrap packet */	
 	public DOPEPacket(byte[] packet){
-		//ByteBuffer buffer = ByteBuffer.wrap(packet);
 		this.packet = packet;
-		//this.header = buffer.get(packet, 0, HEADER_LENGTH).array();
+		ByteBuffer buffer = ByteBuffer.wrap(packet);
+		this.header = new byte[HEADER_LENGTH];
+		this.data = new byte[packet.length - HEADER_LENGTH];
+
+		buffer.get(header);
+		buffer.get(data);
+
+		ByteBuffer headerBuffer = ByteBuffer.wrap(header);
+		this.opCode = headerBuffer.get();
+		this.seqNum = headerBuffer.getChar();
+
+
+		/*//this.header = buffer.get(packet, 0, HEADER_LENGTH).array();
 		//this.data = buffer.get(packet, HEADER_LENGTH, packet.length - HEADER_LENGTH).array();
 		this.header = Arrays.copyOfRange(packet, 0, HEADER_LENGTH);
 		this.data = Arrays.copyOfRange(packet, HEADER_LENGTH, packet.length);
@@ -74,7 +85,7 @@ public class DOPEPacket {
 		//ByteBuffer.wrap(header).get(opCodeBytes, 0, BYTE_SIZE).array();
 		//ByteBuffer.wrap(header).get(seqNumBytes, BYTE_SIZE, CHAR_SIZE).array();
 		this.seqNum = ByteBuffer.wrap(seqNumBytes).getChar();
-		this.opCode = opCodeBytes[0];//ByteBuffeir.wrap(opCodeBytes).get();
+		this.opCode = opCodeBytes[0];//ByteBuffeir.wrap(opCodeBytes).get();*/
 	}
 
 	/* add header to data packets*/

@@ -86,8 +86,13 @@ public class Client {
 		System.out.println("Sent ack:\n" + ack);	
 	}
 
-	private static void display(byte[] bytes) throws IOException {	
-		ImageInputStream in = ImageIO.createImageInputStream(bytes);
+	private static void display(byte[] bytes) throws IOException {
+		OutputStream out = null;
+		out = new FileOutputStream("img.jpg");
+		out.write(bytes);
+		out.close();
+		
+		/*ImageInputStream in = ImageIO.createImageInputStream(bytes);
 		BufferedImage img = ImageIO.read(in);
 		JFrame frame = new JFrame();
 		ImageIcon icon = new ImageIcon(img);
@@ -96,6 +101,6 @@ public class Client {
 		frame.add(lbl);
 		frame.setSize(1500, 1500);
 		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);*/
 	}
 }
