@@ -60,8 +60,8 @@ public class DOPEPacket {
 
 	/* used by reciever to unwrap packet */	
 	public DOPEPacket(byte[] packet){
-		this.packet = packet;
 		ByteBuffer buffer = ByteBuffer.wrap(packet);
+		this.packet = packet;
 		this.header = new byte[HEADER_LENGTH];
 		this.data = new byte[packet.length - HEADER_LENGTH];
 
@@ -71,35 +71,16 @@ public class DOPEPacket {
 		ByteBuffer headerBuffer = ByteBuffer.wrap(header);
 		this.opCode = headerBuffer.get();
 		this.seqNum = headerBuffer.getChar();
-
-
-		/*//this.header = buffer.get(packet, 0, HEADER_LENGTH).array();
-		//this.data = buffer.get(packet, HEADER_LENGTH, packet.length - HEADER_LENGTH).array();
-		this.header = Arrays.copyOfRange(packet, 0, HEADER_LENGTH);
-		this.data = Arrays.copyOfRange(packet, HEADER_LENGTH, packet.length);
-		this.opCodeBytes = Arrays.copyOfRange(header, 0, BYTE_SIZE);
-		this.seqNumBytes = Arrays.copyOfRange(header, BYTE_SIZE, header.length);
-
-		System.out.println("Data len: " + data.length);
-
-		//ByteBuffer.wrap(header).get(opCodeBytes, 0, BYTE_SIZE).array();
-		//ByteBuffer.wrap(header).get(seqNumBytes, BYTE_SIZE, CHAR_SIZE).array();
-		this.seqNum = ByteBuffer.wrap(seqNumBytes).getChar();
-		this.opCode = opCodeBytes[0];//ByteBuffeir.wrap(opCodeBytes).get();*/
 	}
 
 	/* add header to data packets*/
 	public void addHeader(byte opCode, char seqNum){
-		ByteBuffer buffer = ByteBuffer.allocate(BYTE_SIZE + CHAR_SIZE);
+		ByteBuffer buffer = ByteBuffer.allocate(HEADER_LENGTH);
+		buffer.mark();
 		buffer.put(opCode);
-		buffer.putChar(seqNum);
+		buffer.putChar(seqNum).reset();
 
-		buffer.get(header, 0, BYTE_SIZE);
-		buffer.get(header, BYTE_SIZE, CHAR_SIZE);
-		//this.seqNumBytes = ByteBuffer.allocate(CHAR_SIZE).putChar(seqNum).array();
-		//this.opCodeBytes = ByteBuffer.allocate(BYTE_SIZE).put(opCode).array();
-		//System.arraycopy(seqNumBytes, 0, header, 0, seqNumBytes.length);
-		//System.arraycopy(opCodeBytes, 0, header, seqNumBytes.length, opCodeBytes.length);
+		buffer.get(header);
 	}
 
 	/* add header to request packets */

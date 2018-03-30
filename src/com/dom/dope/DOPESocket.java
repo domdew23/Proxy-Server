@@ -65,7 +65,7 @@ public class DOPESocket {
 	}
 
 	public DOPEPacket receiveStopAndWait() throws IOException {
-		byte[] buffer = new byte[515];//43 + DOPEPacket.HEADER_LENGTH];//Control.MAX_PACKET_LENGTH]; /* change to length of data + header length */
+		byte[] buffer = new byte[515]; /* change to length of data + header length */
 		DatagramPacket dgPacket = new DatagramPacket(buffer, buffer.length);
 		connection.receive(dgPacket);
 
@@ -76,7 +76,6 @@ public class DOPESocket {
 			address = dgPacket.getAddress();
 			senderPort = dgPacket.getPort();
 			addressSet = true;
-			System.out.println("Set address.");
 		}
 		return (new DOPEPacket(packet));
 	}

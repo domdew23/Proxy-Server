@@ -20,11 +20,14 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 
+import java.nio.ByteBuffer;
+
+import java.util.ArrayList;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 
 public class Client {
@@ -37,8 +40,6 @@ public class Client {
 	public static void main(String[] args){
 		try {
 			address = InetAddress.getByName(HOST);
-			//address = InetAddress.getLocalHost();
-
 			DOPESocket connection = new DOPESocket(PORT, address);
 			System.out.println("Created connection.");
 
@@ -49,35 +50,41 @@ public class Client {
 			connection.sendStopAndWait(request);
 
 			DOPEPacket packet;
-			byte[] buffer = new byte[Control.MAX_SIZE_IPV4];
-			byte[] bytes = new byte[0];
-			int i = 0;
+			ArrayList<DOPEPacket> packets = new ArrayList<DOPEPacket>();
 
 			while ((packet = connection.receiveStopAndWait()).getDataLength() == Control.MAX_SIZE_IPV4){
-				byte[] tempBuffer = loadBuffer(packet, bytes, buffer, i);		
-				bytes = tempBuffer;
+				packets.add(packet);
 				sendAck(packet, connection);
 			}
 
-			byte[] tempBuffer = loadBuffer(packet, bytes, buffer, i);
-			bytes = tempBuffer;
-			System.out.println(bytes.length);
+			packets.add(packet);
 			sendAck(packet, connection);
 
+			int len = getLength(packets);
+			byte[] bytes = buffer(packets, len);
 			display(bytes);
+
 		} catch (Exception ex){
 			ex.printStackTrace();
 		} finally {
-			connection.close();
+			if (connection != null) connection.close();
 		}
 	}
 
-	private static byte[] loadBuffer(DOPEPacket packet, byte[] bytes, byte[] buffer, int i) {
-		System.out.println("Recieved data packet: " + i++ + "\n" + packet);
-		byte[] tempBuffer = new byte[bytes.length + packet.getDataLength()];
-		System.arraycopy(bytes, 0, tempBuffer, 0, bytes.length);
-		System.arraycopy(buffer, 0, tempBuffer, bytes.length, packet.getDataLength());
-		return tempBuffer;
+	private static int getLength(ArrayList<DOPEPacket> packets){
+		int len = 0;
+		for (int i = 0; i < packets.size(); i++){
+			len += packets.get(i).getDataLength();
+		}
+		return len;
+	}
+
+	private static byte[] buffer(ArrayList<DOPEPacket> packets, int len){
+		ByteBuffer buffer = ByteBuffer.allocate(len);
+		for (int i = 0; i < packets.size(); i++){
+			buffer.put(packets.get(i).getData());
+		}
+		return buffer.array();
 	}
 
 	private static void sendAck(DOPEPacket packet, DOPESocket connection) throws IOException {
@@ -87,13 +94,8 @@ public class Client {
 	}
 
 	private static void display(byte[] bytes) throws IOException {
-		OutputStream out = null;
-		out = new FileOutputStream("img.jpg");
-		out.write(bytes);
-		out.close();
-		
-		/*ImageInputStream in = ImageIO.createImageInputStream(bytes);
-		BufferedImage img = ImageIO.read(in);
+
+		BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
 		JFrame frame = new JFrame();
 		ImageIcon icon = new ImageIcon(img);
 		JLabel lbl = new JLabel();
@@ -101,6 +103,6 @@ public class Client {
 		frame.add(lbl);
 		frame.setSize(1500, 1500);
 		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);*/
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 }

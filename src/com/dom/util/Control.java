@@ -3,6 +3,7 @@ package com.dom.util;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -26,41 +27,20 @@ public class Control {
 
 	}
 
-	public static byte[] getImage(DOPEPacket packet){
+	public static byte[] getImage(DOPEPacket packet) throws IOException {
 		byte[] linkBytes = packet.getData();
 		String link = new String(linkBytes).trim();
 		System.out.println("Received link: " + link);
 
-		try {
-			URL url = new URL(link);
-			InputStream input = url.openStream();
-			byte[] bytes = bufferImage(input);
-			input.close();
-			return bytes;
-		} catch (IOException e){
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private static byte[] bufferImage(InputStream input){
-		byte[] buffer = new byte[2048];
-		byte[] bytes = new byte[0];
-
+		URL url = new URL(link);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		InputStream input = url.openStream();
 		int len = 0;
-		int count = 0;
-		
-		try {
-			while ((len = input.read(buffer)) != -1){
-				byte[] tempBuffer = new byte[bytes.length + len];
-				System.arraycopy(bytes, 0, tempBuffer, 0, bytes.length);
-				System.arraycopy(buffer, 0, tempBuffer, bytes.length, len);
-				bytes = tempBuffer;
-			}
-		} catch (IOException e){
-			e.printStackTrace();
+		byte[] buffer = new byte[1024];
+		while ((len = input.read(buffer)) != -1){
+			out.write(buffer, 0, len);
 		}
-		return bytes;	
+		return out.toByteArray();
 	}
 
 	public static void cacheImage(byte[] bytes){
