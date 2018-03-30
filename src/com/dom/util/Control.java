@@ -18,7 +18,7 @@ public class Control {
 
 	public static final int MAX_SIZE_IPV4 = 512;
 	public static final long MAX_SIZE_IPV6 = (2 ^ 32) - 1;
-	public static final int MAX_PACKET_LENGTH = MAX_SIZE_IPV4 - DOPEPacket.HEADER_LENGTH;
+	public static final int MAX_PACKET_LENGTH = MAX_SIZE_IPV4 + DOPEPacket.HEADER_LENGTH;
 	public static boolean IPv4 = true;
 	public static boolean slidingWindow = false;
 	public static boolean dropPackets = false;
@@ -35,11 +35,12 @@ public class Control {
 		URL url = new URL(link);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream input = url.openStream();
-		int len = 0;
 		byte[] buffer = new byte[1024];
-		while ((len = input.read(buffer)) != -1){
+		
+		for (int len = input.read(buffer); len != -1;){
 			out.write(buffer, 0, len);
 		}
+
 		return out.toByteArray();
 	}
 

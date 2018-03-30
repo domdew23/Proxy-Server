@@ -65,7 +65,7 @@ public class DOPESocket {
 	}
 
 	public DOPEPacket receiveStopAndWait() throws IOException {
-		byte[] buffer = new byte[515]; /* change to length of data + header length */
+		byte[] buffer = new byte[Control.MAX_PACKET_LENGTH];
 		DatagramPacket dgPacket = new DatagramPacket(buffer, buffer.length);
 		connection.receive(dgPacket);
 

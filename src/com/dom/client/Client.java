@@ -52,31 +52,23 @@ public class Client {
 			DOPEPacket packet;
 			ArrayList<DOPEPacket> packets = new ArrayList<DOPEPacket>();
 
-			while ((packet = connection.receiveStopAndWait()).getDataLength() == Control.MAX_SIZE_IPV4){
+			int len = 0;
+			for (; (packet = connection.receiveStopAndWait()).getDataLength() == Control.MAX_SIZE_IPV4; len += packet.getDataLength()){
 				packets.add(packet);
 				sendAck(packet, connection);
 			}
 
 			packets.add(packet);
+			len+= packet.getDataLength();
 			sendAck(packet, connection);
 
-			int len = getLength(packets);
-			byte[] bytes = buffer(packets, len);
-			display(bytes);
+			display(buffer(packets, len));
 
 		} catch (Exception ex){
 			ex.printStackTrace();
 		} finally {
 			if (connection != null) connection.close();
 		}
-	}
-
-	private static int getLength(ArrayList<DOPEPacket> packets){
-		int len = 0;
-		for (int i = 0; i < packets.size(); i++){
-			len += packets.get(i).getDataLength();
-		}
-		return len;
 	}
 
 	private static byte[] buffer(ArrayList<DOPEPacket> packets, int len){
@@ -94,7 +86,6 @@ public class Client {
 	}
 
 	private static void display(byte[] bytes) throws IOException {
-
 		BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
 		JFrame frame = new JFrame();
 		ImageIcon icon = new ImageIcon(img);

@@ -63,7 +63,7 @@ public class DOPEPacket {
 		ByteBuffer buffer = ByteBuffer.wrap(packet);
 		this.packet = packet;
 		this.header = new byte[HEADER_LENGTH];
-		this.data = new byte[packet.length - HEADER_LENGTH];
+		this.data = new byte[packet.length - header.length];
 
 		buffer.get(header);
 		buffer.get(data);
@@ -74,35 +74,37 @@ public class DOPEPacket {
 	}
 
 	/* add header to data packets*/
-	public void addHeader(byte opCode, char seqNum){
-		ByteBuffer buffer = ByteBuffer.allocate(HEADER_LENGTH);
+	private void addHeader(byte opCode, char seqNum){
+		ByteBuffer buffer = ByteBuffer.allocate(header.length);
 		buffer.mark();
 		buffer.put(opCode);
 		buffer.putChar(seqNum).reset();
-
 		buffer.get(header);
 	}
 
 	/* add header to request packets */
-	public void addHeader(byte opCode){
-		ByteBuffer buffer = ByteBuffer.allocate(HEADER_LENGTH);
+	private void addHeader(byte opCode){
+		ByteBuffer buffer = ByteBuffer.allocate(header.length);
 		buffer.mark();
 		buffer.put(opCode);
 		buffer.putChar(seqNum).reset();
 		buffer.get(header);
 	}
 
-	public void makeDataPacket(){
-		System.arraycopy(header, 0, packet, 0, header.length);
-		System.arraycopy(data, 0, packet, header.length, data.length);
+	private void makeDataPacket(){
+		ByteBuffer buffer = ByteBuffer.allocate(packet.length);
+		buffer.mark();
+		buffer.put(header);
+		buffer.put(data).reset();
+		buffer.get(packet);
 	}
 
-	public void makeRequestPacket(){
+	private void makeRequestPacket(){
 		makeDataPacket();
 	}
 
-	public void makeAckPacket(){
-		ByteBuffer buffer = ByteBuffer.allocate(HEADER_LENGTH);
+	private void makeAckPacket(){
+		ByteBuffer buffer = ByteBuffer.allocate(packet.length);
 		buffer.mark();
 		buffer.put(opCode);
 		buffer.putChar(seqNum).reset();
@@ -118,7 +120,7 @@ public class DOPEPacket {
 	}
 
 	public int getDataLength(){
-		return (packet.length - HEADER_LENGTH);
+		return (packet.length - header.length);
 	}
 
 	public char getSequenceNumber(){
