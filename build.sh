@@ -1,4 +1,4 @@
-source build.sh
+#!/bin/bash
 
 cd src
 javac -d ../bin com/dom/dope/*.java

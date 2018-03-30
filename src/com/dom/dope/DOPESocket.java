@@ -26,7 +26,7 @@ Each packet has associated with it the source TID and dest TID - handed to UDP a
 
 public class DOPESocket {
 	
-	private int port, senderPort;
+	private int port, senderPort=-1;
 	private InetAddress address;
 	private DatagramSocket connection;
 	private DOPEPacket[] packets;
@@ -54,8 +54,15 @@ public class DOPESocket {
 
 	public void sendStopAndWait(DOPEPacket packet) throws IOException {
 		byte[] bytes = packet.getPacket();
-		System.out.println("Sending " + bytes.length + " bytes.");
-		DatagramPacket dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
+		System.out.println("Sending " + bytes.length + " bytes.");	
+		DatagramPacket dgPacket;
+		if (senderPort != -1) {
+			System.out.println("Sending back to client...");
+			dgPacket = new DatagramPacket(bytes, bytes.length, address, senderPort);
+		} else {
+			System.out.println("Sending to server...");
+			dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
+		}
 		connection.send(dgPacket);
 		System.out.println("Packet sent.");
 	}
@@ -92,6 +99,9 @@ public class DOPESocket {
 		if (Control.slidingWindow){
 
 		} else {
+			if (currentSeqNum == packets.length){
+				System.exit(0);
+			}
 			if (currentSeqNum == ackPacket.getSequenceNumber()){
 				/* recieved next packet in the chain */
 				currentSeqNum++;

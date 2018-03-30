@@ -36,8 +36,9 @@ public class Control {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream input = url.openStream();
 		byte[] buffer = new byte[1024];
-		
-		for (int len = input.read(buffer); len != -1;){
+		int len = 0;
+
+		while ((len = input.read(buffer)) != -1){
 			out.write(buffer, 0, len);
 		}
 
