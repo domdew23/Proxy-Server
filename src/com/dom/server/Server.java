@@ -8,23 +8,23 @@ import java.net.DatagramPacket;
 import java.net.SocketTimeoutException;
 
 import com.dom.dope.DOPEPacket;
-import com.dom.dope.DOPESocket;
+import com.dom.dope.DOPEServerSocket;
 import com.dom.util.Control;
 
 public class Server {
 
-	private static DOPESocket connection;
+	private static DOPEServerSocket connection;
 	private static final int PORT = 2703;
 
 	public static void main(String[] args) {
 		try {
-			connection = new DOPESocket(PORT);
+			connection = new DOPEServerSocket(PORT);
 			for (;;){
 				DOPEPacket packet = connection.receive();
 
 				switch (packet.getOpcode()){
 					/* read request packet */
-					case 0: connection.beginTransfer(packet) break;
+					case 0: connection.beginTransfer(packet); break;
 					/* ack packet */
 					case 2: connection.continueTransfer(packet); break;
 				}

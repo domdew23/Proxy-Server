@@ -1,8 +1,7 @@
 package com.dom.dope;
 
-import java.nio.ByteBuffer;
-import java.net.DatagramPacket;
 import java.util.Arrays;
+import java.nio.ByteBuffer;
 
 /* Dom's Original Protocol Extended */
 

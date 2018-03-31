@@ -11,6 +11,9 @@ import com.dom.util.Control;
 
 import java.util.Arrays;
 import java.util.PriorityQueue;
+
+/* Dom's Original Protocol Extended */
+
 /*
 A packet less than 512 (Max bytes per packet) signals termination of transfer
 If packet is dropped, intended recipiant times out and retransmit last packet (data or ack)
@@ -27,51 +30,45 @@ Each packet has associated with it the source TID and dest TID - handed to UDP a
 
 public class DOPESocket {
 	
-	private int port, senderPort=-1;
-	private InetAddress address;
+	protected int port, senderPort=-1;
+	protected InetAddress address;
+	protected DOPEPacket[] packets;
+	protected char currentSeqNum;
+	protected boolean addressSet;
+	protected PriorityQueue<DOPEPacket> window;
+	
 	private DatagramSocket connection;
-	private DOPEPacket[] packets;
-	private char currentSeqNum;
-	private boolean addressSet;
-	private PriorityQueue<DOPEPacket> window;
 
 	public DOPESocket(int port, InetAddress address) throws IOException {
 		/* new client socket */
 		this.port = port;
 		this.address = address;
-		this.connection = new DatagramSocket();
 		this.addressSet = true;
+		this.connection = new DatagramSocket();
 	}
 
 	public DOPESocket(int port) throws IOException {
+		/* a new server socket */
 		this.port = port;
-		this.connection = new DatagramSocket(port);
 		this.addressSet = false;
+		this.connection = new DatagramSocket(port);
 	}
 
-	public DOPESocket(InetAddress address) throws IOException {
-		this.connection = new DatagramSocket();
-		this.address = address;
-	}
-
-	public void sendStopAndWait(DOPEPacket packet) throws IOException {
+	public void send(DOPEPacket packet) throws IOException {
 		DatagramPacket dgPacket = makePacket(packet);
 		connection.send(dgPacket);
 		System.out.println("Packet sent.");
 	}
 
-	public void sendSlidingWindow(){
+	public void sendSlidingWindow() throws IOException {
 		for (int i = 0; i < 4; i++){
 			DOPEPacket packet = packets[i + currentSeqNum - 1];
-			DatagramPacket dgPacket = makePacket(packet);
-			connection.send(dgPacket);
-
+			send(packet);
 			window.add(packet);
 		}
-		
 	}
 
-	private DatagramPacket makePacket(DOPEPacket packet){
+	private DatagramPacket makePacket(DOPEPacket packet) throws IOException {
 		byte[] bytes = packet.getPacket();	
 		DatagramPacket dgPacket;
 		
@@ -95,38 +92,6 @@ public class DOPESocket {
 			addressSet = true;
 		}
 		return (new DOPEPacket(packet));
-	}
-
-	public void beginTransfer(DOPEPacket requestPacket) throws IOException {
-		/* send first data packet to client */
-		byte[] bytes = Control.getImage(requestPacket);
-		packets = Control.split(bytes);
-		currentSeqNum = 1;
-		
-		if (Control.slidingWindow) this.window = new PriorityQueue<DOPEPacket>(4); sendSlidingWindow();
-		else sendStopAndWait(packets[currentSeqNum - 1]);
-		
-	}
-
-	public void continueTransfer(DOPEPacket ackPacket) throws IOException {
-		if (Control.slidingWindow){
-
-		} else {
-			if (currentSeqNum == packets.length){
-				addressSet = false;
-				senderPort = -1;
-				return;
-			}
-			if (currentSeqNum == ackPacket.getSequenceNumber()){
-				/* recieved next packet in the chain */
-				currentSeqNum++;
-				sendStopAndWait(packets[currentSeqNum - 1]);
-			} else {
-				/* recieved wrong packet in the chain */
-				System.out.println("Received wrong packet in chain - should not happen for stop and wait");
-				System.exit(0);
-			}
-		}
 	}
 
 	public void setAddress(InetAddress address){

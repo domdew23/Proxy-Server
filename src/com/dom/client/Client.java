@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 import java.net.SocketTimeoutException;
 
 import com.dom.dope.DOPEPacket;
-import com.dom.dope.DOPESocket;
+import com.dom.dope.DOPEClientSocket;
 import com.dom.util.Control;
 
 import javax.swing.JLabel;
@@ -34,6 +34,7 @@ import java.io.ByteArrayInputStream;
 Packets inside window have been transmitted but not acknowledge
 Buffer - store packets that have been transmitted, discard packets that have been acked
 Client neeeds to identify duplicate packets and dicard and identiy missing packets
+Window size is number of packets yet to be acked
 */
 
 public class Client {
@@ -48,20 +49,20 @@ public class Client {
 
 		try {
 			address = InetAddress.getByName(HOST);
-			DOPESocket connection = new DOPESocket(PORT, address);
+			DOPEClientSocket connection = new DOPEClientSocket(PORT, address);
 			System.out.println("Created connection.");
 
 			byte[] linkBytes = link.getBytes("UTF-8");
 			System.out.println("Sending link: " + new String(linkBytes) + " | size: " + linkBytes.length);
 
 			DOPEPacket request = new DOPEPacket(Control.RQ_OP_CODE, linkBytes);
-			connection.sendStopAndWait(request);
+			connection.send(request);
 
 			DOPEPacket packet;
 			ArrayList<DOPEPacket> packets = new ArrayList<DOPEPacket>();
 
 			int len = 0;
-			for (; (packet = connection.receiveStopAndWait()).getDataLength() == Control.MAX_SIZE_IPV4; len += packet.getDataLength()){
+			for (; (packet = connection.receive()).getDataLength() == Control.MAX_SIZE_IPV4; len += packet.getDataLength()){
 				packets.add(packet);
 				sendAck(packet, connection);
 			}
@@ -87,9 +88,9 @@ public class Client {
 		return buffer.array();
 	}
 
-	private static void sendAck(DOPEPacket packet, DOPESocket connection) throws IOException {
+	private static void sendAck(DOPEPacket packet, DOPEClientSocket connection) throws IOException {
 		DOPEPacket ack = new DOPEPacket(Control.ACK_OP_CODE, packet.getSequenceNumber());
-		connection.sendStopAndWait(ack);
+		connection.send(ack);
 		System.out.println("Sent ack:\n" + ack);	
 	}
 
