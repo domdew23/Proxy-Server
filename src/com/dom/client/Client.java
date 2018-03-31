@@ -30,6 +30,12 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.ByteArrayInputStream;
 
+/*
+Packets inside window have been transmitted but not acknowledge
+Buffer - store packets that have been transmitted, discard packets that have been acked
+Client neeeds to identify duplicate packets and dicard and identiy missing packets
+*/
+
 public class Client {
 	private static final int PORT = 2703;
 	private static final String HOST = "pi.cs.oswego.edu";
@@ -38,6 +44,8 @@ public class Client {
 	private static DatagramSocket connection;
 	
 	public static void main(String[] args){
+		parseArgs(args);
+
 		try {
 			address = InetAddress.getByName(HOST);
 			DOPESocket connection = new DOPESocket(PORT, address);
@@ -83,6 +91,16 @@ public class Client {
 		DOPEPacket ack = new DOPEPacket(Control.ACK_OP_CODE, packet.getSequenceNumber());
 		connection.sendStopAndWait(ack);
 		System.out.println("Sent ack:\n" + ack);	
+	}
+
+	private static void parseArgs(String[] args){
+		for (int i = 0; i < args.length; i++){
+			switch (args[i]){
+				case "-sw": Control.slidingWindow = true; break;
+				case "-d": Control.dropPackets = true; break;
+				default: System.out.println("Invalid args."); System.exit(0);
+			}
+		}
 	}
 
 	private static void display(byte[] bytes) throws IOException {

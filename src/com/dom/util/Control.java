@@ -15,16 +15,17 @@ public class Control {
 	public static final byte RQ_OP_CODE = 0;
 	public static final byte DATA_OP_CODE = 1;
 	public static final byte ACK_OP_CODE = 2;
-
+	public static final byte WINDOW_SIZE = 4;
+ 
 	public static final int MAX_SIZE_IPV4 = 512;
 	public static final long MAX_SIZE_IPV6 = (2 ^ 32) - 1;
 	public static final int MAX_PACKET_LENGTH = MAX_SIZE_IPV4 + DOPEPacket.HEADER_LENGTH;
+
 	public static boolean IPv4 = true;
 	public static boolean slidingWindow = false;
 	public static boolean dropPackets = false;
 
 	public Control(){
-
 	}
 
 	public static byte[] getImage(DOPEPacket packet) throws IOException {
@@ -57,15 +58,6 @@ public class Control {
 
 	public static DOPEPacket[] split(byte[] bytes){
 		int packetCount = 0;
-		/*long max = 0;
-
-		if (IPv4) {
-			packetCount = (int) Math.ceil((double) bytes.length / MAX_SIZE_IPV4);
-			max = (long) MAX_SIZE_IPV4;
-		} else {
-			packetCount = (int) Math.ceil((double) bytes.length / MAX_SIZE_IPV6); 
-			max = MAX_SIZE_IPV6;
-		}*/
 
 		int max = MAX_SIZE_IPV4;
 		packetCount = (int) Math.ceil((double) bytes.length / max);
