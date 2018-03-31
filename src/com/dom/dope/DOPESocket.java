@@ -100,7 +100,8 @@ public class DOPESocket {
 
 		} else {
 			if (currentSeqNum == packets.length){
-				System.exit(0);
+				addressSet = false;
+				return;
 			}
 			if (currentSeqNum == ackPacket.getSequenceNumber()){
 				/* recieved next packet in the chain */
