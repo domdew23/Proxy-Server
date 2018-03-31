@@ -20,15 +20,13 @@ public class Server {
 		try {
 			connection = new DOPESocket(PORT);
 			for (;;){
-				DOPEPacket packet;
-				if (Control.slidingWindow) packet = null;
-				else packet = connection.receiveStopAndWait();
-	            
+				DOPEPacket packet = connection.receive();
+
 				switch (packet.getOpcode()){
 					/* read request packet */
-					case 0: System.out.println("Got request packet."); connection.beginTransferStopAndWait(packet); break;
+					case 0: connection.beginTransfer(packet) break;
 					/* ack packet */
-					case 2: System.out.println("Got ack packet."); connection.continueTransferServer(packet); break; 
+					case 2: connection.continueTransfer(packet); break;
 				}
 			}
 		} catch (IOException ex){

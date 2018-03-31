@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 /* Dom's Original Protocol Extended */
 
-public class DOPEPacket {
+public class DOPEPacket implements Comparable<DOPEPacket> {
 	/*
 		Opcodes:
 		0 - Read Request
@@ -137,6 +137,12 @@ public class DOPEPacket {
 
 	public byte[] getHeader(){
 		return header;
+	}
+
+	public int compareTo(DOPEPacket other){
+		if (other.seqNum == this.seqNum) return 0;
+		if (other.seqNum < this.seqNum) return 1;
+		return -1;
 	}
 
 	public String toString(){
