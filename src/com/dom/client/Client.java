@@ -41,6 +41,7 @@ public class Client {
 	private static DOPEClientSocket connection;
 	
 	public static void main(String[] args){
+		long start = System.currentTimeMillis();
 		Control.parseArgs(args);
 		Control.isReceiver = true;
 
@@ -56,6 +57,7 @@ public class Client {
 			else
 				packets = connection.stopAndWait();
 
+			System.out.println("Took: {" + (System.currentTimeMillis() - start) + "}");
 			display(buffer(packets));
 
 		} catch (Exception ex){
@@ -72,16 +74,16 @@ public class Client {
 
 	private static byte[] buffer(ArrayList<DOPEPacket> packets){
 		ByteBuffer buffer = ByteBuffer.allocate(Control.dataLength);
-		for (int i = 0; i < packets.size(); i++){
+		
+		for (int i = 0; i < packets.size(); i++)
 			buffer.put(packets.get(i).getData());
-		}
+
 		return buffer.array();
 	}
 
 	private static void display(byte[] bytes) throws IOException {
-		BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
 		JFrame frame = new JFrame();
-		ImageIcon icon = new ImageIcon(img);
+		ImageIcon icon = new ImageIcon(ImageIO.read(new ByteArrayInputStream(bytes)));
 		JLabel lbl = new JLabel();
 		lbl.setIcon(icon);
 		frame.add(lbl);

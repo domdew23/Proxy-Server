@@ -45,6 +45,7 @@ public class DOPESocket {
 		this.address = address;
 		this.addressSet = true;
 		this.connection = new DatagramSocket();
+		this.connection.setSoTimeout(3000);
 	}
 
 	public DOPESocket(int port) throws IOException {
@@ -52,6 +53,7 @@ public class DOPESocket {
 		this.port = port;
 		this.addressSet = false;
 		this.connection = new DatagramSocket(port);
+		this.connection.setSoTimeout(3000);
 	}
 
 	public void send(DOPEPacket packet) throws IOException {

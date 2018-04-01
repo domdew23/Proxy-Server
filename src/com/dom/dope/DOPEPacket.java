@@ -45,8 +45,9 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 	public DOPEPacket(byte opCode, byte[] data){
 		this.opCode = opCode;
 		this.seqNum = 0;
+		this.advertisedWindow = 0;
 		this.data = data;
-		this.header = new byte[HEADER_LENGTH];
+		this.header = new byte[HEADER_LENGTH + BYTE_SIZE];
 		this.packet = new byte[header.length + data.length];
 		addHeader(opCode);
 		makeRequestPacket();
@@ -107,7 +108,8 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 		ByteBuffer buffer = ByteBuffer.allocate(header.length);
 		buffer.mark();
 		buffer.put(opCode);
-		buffer.putChar(seqNum).reset();
+		buffer.putChar(seqNum);
+		buffer.put(advertisedWindow).reset();
 		buffer.get(header);
 	}
 
@@ -178,6 +180,10 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 	}
 
 	public String toString(){
-		return "Packet:\nOpcode: " + opCode + "\nSequence Number: " + (int) seqNum + "\nPacket size: " + packet.length + "\nData size: " + data.length;
+		int dataLen = 0;
+		if (data != null)
+			dataLen = data.length;
+
+		return "Packet:\nOpcode: " + opCode + "\nSequence Number: " + (int) seqNum + "\nPacket size: " + packet.length + "\nData size: " + dataLen;
 	}
 }

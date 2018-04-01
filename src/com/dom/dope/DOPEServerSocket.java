@@ -49,6 +49,11 @@ public class DOPEServerSocket extends DOPESocket {
 		}
 
 		for (int i = LAR; i < SWS + LAR; i++){
+			if (i == packets.length - 1){
+				resetSenderData();
+				return;
+			}
+
 			DOPEPacket packet = packets[i];
 			send(packet);
 			System.out.println("Sent packet: " + i);
