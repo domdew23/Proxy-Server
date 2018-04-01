@@ -22,6 +22,7 @@ public class DOPEServerSocket extends DOPESocket {
 		currentSeqNum = 1;
 		
 		if (Control.slidingWindow) {
+			System.out.println("Starting sliding window.");
 			this.SWS = Control.WINDOW_SIZE;
 			this.LAR = 0;
 			this.LPS = 0;
@@ -50,6 +51,7 @@ public class DOPEServerSocket extends DOPESocket {
 		for (int i = LAR; i < SWS + LAR; i++){
 			DOPEPacket packet = packets[i];
 			send(packet);
+			System.out.println("Sent packet: " + i);
 
 			window.add(packet);
 			LPS = packet.getSequenceNumber();

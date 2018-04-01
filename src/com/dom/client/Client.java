@@ -41,9 +41,9 @@ public class Client {
 	private static DOPEClientSocket connection;
 	
 	public static void main(String[] args){
-		parseArgs(args);
+		Control.parseArgs(args);
 		Control.isReceiver = true;
-		
+
 		try {
 			address = InetAddress.getByName(HOST);
 			connection = new DOPEClientSocket(PORT, address);
@@ -76,16 +76,6 @@ public class Client {
 			buffer.put(packets.get(i).getData());
 		}
 		return buffer.array();
-	}
-
-	private static void parseArgs(String[] args){
-		for (int i = 0; i < args.length; i++){
-			switch (args[i]){
-				case "-sw": Control.slidingWindow = true; break;
-				case "-d": Control.dropPackets = true; break;
-				default: System.out.println("Invalid args."); System.exit(0);
-			}
-		}
 	}
 
 	private static void display(byte[] bytes) throws IOException {
