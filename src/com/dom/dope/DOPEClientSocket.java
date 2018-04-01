@@ -29,6 +29,7 @@ public class DOPEClientSocket extends DOPESocket {
 
 	public DOPEClientSocket(int port, InetAddress address) throws IOException {
 		super(port, address);
+		this.connection.setSoTimeout(2000);
 	}
 
 	public ArrayList<DOPEPacket> stopAndWait() throws IOException {

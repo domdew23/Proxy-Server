@@ -33,12 +33,10 @@ public class DOPESocket {
 	
 	protected int port, senderPort=-1;
 	protected InetAddress address;
-	protected DOPEPacket[] packets;
 	protected char currentSeqNum;
 	protected boolean addressSet;
 	protected PriorityQueue<DOPEPacket> window;
-	
-	private DatagramSocket connection;
+	protected DatagramSocket connection;
 
 	public DOPESocket(int port, InetAddress address) throws IOException {
 		/* new client socket */
@@ -46,7 +44,6 @@ public class DOPESocket {
 		this.address = address;
 		this.addressSet = true;
 		this.connection = new DatagramSocket();
-		this.connection.setSoTimeout(3000);
 	}
 
 	public DOPESocket(int port) throws IOException {
@@ -54,13 +51,11 @@ public class DOPESocket {
 		this.port = port;
 		this.addressSet = false;
 		this.connection = new DatagramSocket(port);
-		this.connection.setSoTimeout(3000);
+		this.connection.setSoTimeout(0);
 	}
 
 	public void send(DOPEPacket packet) throws IOException {
-		DatagramPacket dgPacket = makePacket(packet);
-		connection.send(dgPacket);
-		System.out.println("Packet sent.");
+		connection.send(makePacket(packet));
 	}
 
 	public DOPEPacket receive() throws IOException {

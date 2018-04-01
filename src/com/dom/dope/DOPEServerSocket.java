@@ -10,6 +10,7 @@ public class DOPEServerSocket extends DOPESocket {
 	private byte SWS; /* Send window size (# of unacked packets) */
 	private char LAR; /* SeqNum of Last Ack Received */ 
 	private char LPS; /* SeqNum of Last Packet Sent */
+	private DOPEPacket[] packets;
 
 	public DOPEServerSocket(int port) throws IOException {
 		super(port);
@@ -49,11 +50,6 @@ public class DOPEServerSocket extends DOPESocket {
 		}
 
 		for (int i = LAR; i < SWS + LAR; i++){
-			if (i == packets.length - 1){
-				resetSenderData();
-				return;
-			}
-
 			DOPEPacket packet = packets[i];
 			send(packet);
 			System.out.println("Sent packet: " + i);
@@ -79,9 +75,8 @@ public class DOPEServerSocket extends DOPESocket {
 	private void shiftWindow(){
 		for (;;){
 			DOPEPacket packet = window.poll();
-			if (packet.getSequenceNumber() == LAR){
+			if (packet == null || packet.getSequenceNumber() == LAR)
 				break;
-			}
 		}
 	}
 }
