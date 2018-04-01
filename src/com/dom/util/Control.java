@@ -83,4 +83,14 @@ public class Control {
 		System.out.println("Split packets (" + packets.length + ").");
 		return packets;
 	}
+
+	public static void parseArgs(String[] args){
+		for (int i = 0; i < args.length; i++){
+			switch(args[i]){
+				case "-sw": slidingWindow = true; break;
+				case "-d": dropPackets = true; break;
+				default: System.out.println("Invalid args."); System.exit(0);
+			}
+		}
+	}
 }

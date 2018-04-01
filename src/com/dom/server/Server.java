@@ -17,6 +17,8 @@ public class Server {
 	private static final int PORT = 2703;
 
 	public static void main(String[] args) {
+		Control.parseArgs(args);
+
 		try {
 			connection = new DOPEServerSocket(PORT);
 			for (;;){
