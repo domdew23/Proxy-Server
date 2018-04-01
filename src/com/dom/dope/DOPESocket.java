@@ -64,11 +64,8 @@ public class DOPESocket {
 		byte[] buffer = new byte[Control.MAX_PACKET_LENGTH];
 		DatagramPacket dgPacket = new DatagramPacket(buffer, buffer.length);
 		connection.receive(dgPacket);
-
 		byte[] bytes = Arrays.copyOfRange(buffer, 0, dgPacket.getLength());
-		
-		System.out.println("Received packet of size: " + dgPacket.getLength());
-		
+				
 		if (!addressSet) 
 			setSenderData(dgPacket.getAddress(), dgPacket.getPort());
 		

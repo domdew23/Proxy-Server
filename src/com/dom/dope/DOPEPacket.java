@@ -74,7 +74,7 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 		ByteBuffer buffer = ByteBuffer.wrap(packet);
 		this.packet = packet;
 		
-		if (Control.slidingWindow)
+		if (Control.slidingWindow && !Control.isReceiver)
 			this.header = new byte[HEADER_LENGTH + BYTE_SIZE];
 		else
 			this.header = new byte[HEADER_LENGTH];
@@ -88,7 +88,7 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 		this.opCode = headerBuffer.get();
 		this.seqNum = headerBuffer.getChar();
 		
-		if (Control.slidingWindow) 
+		if (Control.slidingWindow && !Control.isReceiver) 
 			this.advertisedWindow = headerBuffer.get();
 	}
 
@@ -177,6 +177,6 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 	}
 
 	public String toString(){
-		return "Packet:\nOpcode: " + opCode + "\nSequence Number: " + (int) seqNum;
+		return "Packet:\nOpcode: " + opCode + "\nSequence Number: " + (int) seqNum + "\nPacket size: " + packet.length + "\nData size: " + data.length;
 	}
 }

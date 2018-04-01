@@ -42,7 +42,8 @@ public class Client {
 	
 	public static void main(String[] args){
 		parseArgs(args);
-
+		Control.isReceiver = true;
+		
 		try {
 			address = InetAddress.getByName(HOST);
 			connection = new DOPEClientSocket(PORT, address);
@@ -57,7 +58,7 @@ public class Client {
 
 			display(buffer(packets));
 
-		} catch (IOException ex){
+		} catch (Exception ex){
 			ex.printStackTrace();
 		} finally {
 			try {

@@ -55,7 +55,7 @@ public class DOPEClientSocket extends DOPESocket {
 		return packets;
 	}
 
-	public ArrayList<DOPEPacket> slidingWindow() throws IOException {
+	public ArrayList<DOPEPacket> slidingWindow() throws IOException {		
 		this.RWS = Control.WINDOW_SIZE;
 		this.seqNumToAck = 0;
 		this.LPR = seqNumToAck;
@@ -69,6 +69,8 @@ public class DOPEClientSocket extends DOPESocket {
 		for (;;){
 			try {
 				packet = receive();
+				System.out.println("Received packet: " + packet);
+				
 				if (packet.getSequenceNumber() <= LAP && packet.getSequenceNumber() > LPR && !contains(packet)){
 					window.add(packet);
 					len += packet.getDataLength();
@@ -90,6 +92,7 @@ public class DOPEClientSocket extends DOPESocket {
 			} catch (SocketTimeoutException ex){
 				advertisedWindow = (byte) (RWS - window.size());
 				sendAck(seqNumToAck, advertisedWindow);
+				System.out.println("Timed Out.");
 			}
 		}
 

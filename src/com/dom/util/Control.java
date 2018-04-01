@@ -24,6 +24,7 @@ public class Control {
 	public static boolean IPv4 = true;
 	public static boolean slidingWindow = false;
 	public static boolean dropPackets = false;
+	public static boolean isReceiver = false;
 
 	public Control(){
 	}
