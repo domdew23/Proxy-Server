@@ -73,7 +73,12 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 	public DOPEPacket(byte[] packet){
 		ByteBuffer buffer = ByteBuffer.wrap(packet);
 		this.packet = packet;
-		this.header = new byte[HEADER_LENGTH];
+		
+		if (Control.slidingWindow)
+			this.header = new byte[HEADER_LENGTH + BYTE_SIZE];
+		else
+			this.header = new byte[HEADER_LENGTH];
+
 		this.data = new byte[packet.length - header.length];
 
 		buffer.get(header);
@@ -82,7 +87,9 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 		ByteBuffer headerBuffer = ByteBuffer.wrap(header);
 		this.opCode = headerBuffer.get();
 		this.seqNum = headerBuffer.getChar();
-		if (Control.slidingWindow) this.advertisedWindow = headerBuffer.get();
+		
+		if (Control.slidingWindow) 
+			this.advertisedWindow = headerBuffer.get();
 	}
 
 	/* add header to data packets*/
@@ -111,22 +118,22 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 		buffer.get(packet);
 	}
 
+	/* request packet is equivalent to a data packet with request being the data */
 	private void makeRequestPacket(){
 		makeDataPacket();
 	}
 
+	/* make ack packets for both stop and wait and sliding window */
 	private void makeAckPacket(){
 		ByteBuffer buffer = ByteBuffer.allocate(packet.length);
 		buffer.mark();
 		buffer.put(opCode);
-		
-		if (Control.slidingWindow){
-			buffer.putChar(seqNum);
-			buffer.put(advertisedWindow).reset();
-		} else {
-			buffer.putChar(seqNum).reset();
-		}
+		buffer.putChar(seqNum);
 
+		if (Control.slidingWindow)
+			buffer.put(advertisedWindow);
+
+		buffer.reset();
 		buffer.get(packet);
 	}
 
@@ -148,6 +155,10 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 
 	public byte getOpcode(){
 		return opCode;
+	}
+
+	public byte getAdvertisedWindow(){
+		return advertisedWindow;
 	}
 
 	public byte[] getData(){

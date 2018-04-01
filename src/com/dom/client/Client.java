@@ -1,10 +1,6 @@
 package com.dom.client;
 
 import java.net.InetAddress;
-import java.net.DatagramSocket;
-import java.net.DatagramPacket;
-import java.net.UnknownHostException;
-import java.net.SocketTimeoutException;
 
 import com.dom.dope.DOPEPacket;
 import com.dom.dope.DOPEClientSocket;
@@ -40,9 +36,9 @@ Window size is number of packets yet to be acked
 public class Client {
 	private static final int PORT = 2703;
 	private static final String HOST = "pi.cs.oswego.edu";
-	private static final String link = "http://www.smashbros.com/images/og/link.jpg";
+	private static final String LINK = "http://www.smashbros.com/images/og/link.jpg";
 	private static InetAddress address;
-	private static DatagramSocket connection;
+	private static DOPEClientSocket connection;
 	
 	public static void main(String[] args){
 		parseArgs(args);
@@ -50,22 +46,26 @@ public class Client {
 		try {
 			address = InetAddress.getByName(HOST);
 			connection = new DOPEClientSocket(PORT, address);
-			connection.send(new DOPEPacket(Control.RQ_OP_CODE, link.getBytes("UTF-8"))); /* send request for to server for a image given a link */
+			connection.send(new DOPEPacket(Control.RQ_OP_CODE, LINK.getBytes("UTF-8"))); /* send request for to server for a image given a link */
 
 			ArrayList<DOPEPacket> packets;
 
-			if (Control.slidingWindow){
+			if (Control.slidingWindow)
 				packets = connection.slidingWindow();
-			} else {
+			else
 				packets = connection.stopAndWait();
-			}
 
 			display(buffer(packets));
 
 		} catch (IOException ex){
 			ex.printStackTrace();
 		} finally {
-			if (connection != null) connection.close();
+			try {
+				if (connection != null) 
+					connection.close();
+			} catch (IOException e){
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -12,9 +12,9 @@ import java.util.Iterator;
 
 public class DOPEClientSocket extends DOPESocket {
 	
-	private int RWS; /* Receive Window Size (# of out-of-order packets) */
+	private byte RWS; /* Receive Window Size (# of out-of-order packets) */
 	private char LAP; /* SeqNum of Largest acceptable packet */
-	private char LPF; /* SeqNum of Last Packet Received */
+	private char LPR; /* SeqNum of Last Packet Received */
 	private char seqNumToAck; /* Largest SeqNum not yet acked - all packets with SeqNum <= SeqNumToAck have been received */
 	private byte advertisedWindow; /* window size that receiver can currently accept */
 
@@ -33,7 +33,8 @@ public class DOPEClientSocket extends DOPESocket {
 
 	public ArrayList<DOPEPacket> stopAndWait() throws IOException {
 		int len = 0;
-		DOPEPacket packet;
+		DOPEPacket packet = null;
+		DOPEPacket lastPacket = null;
 		ArrayList<DOPEPacket> packets = new ArrayList<DOPEPacket>();
 
 		for (;;){
@@ -43,8 +44,9 @@ public class DOPEClientSocket extends DOPESocket {
 				packets.add(packet);
 				sendAck(packet);
 				if (packet.getDataLength() < Control.MAX_SIZE_IPV4) break;
+				lastPacket = packet;
 			} catch (SocketTimeoutException e){
-				sendAck(packet);
+				sendAck(lastPacket);
 			}
 		}
 
@@ -54,10 +56,10 @@ public class DOPEClientSocket extends DOPESocket {
 	}
 
 	public ArrayList<DOPEPacket> slidingWindow() throws IOException {
-		this.RWS = 4;
+		this.RWS = Control.WINDOW_SIZE;
 		this.seqNumToAck = 0;
 		this.LPR = seqNumToAck;
-		this.LAP = LPR + RWS;
+		this.LAP = (char) (LPR + RWS);
 		this.window = new PriorityQueue<DOPEPacket>(RWS);
 
 		int len = 0;
@@ -86,7 +88,7 @@ public class DOPEClientSocket extends DOPESocket {
 				}
 				if (packet.getDataLength() < Control.MAX_SIZE_IPV4) break;
 			} catch (SocketTimeoutException ex){
-				advertisedWindow = RWS - window.size();
+				advertisedWindow = (byte) (RWS - window.size());
 				sendAck(seqNumToAck, advertisedWindow);
 			}
 		}
@@ -112,7 +114,7 @@ public class DOPEClientSocket extends DOPESocket {
 
 	private void shiftWindow(ArrayList<DOPEPacket> packets){
 		this.LPR = seqNumToAck;
-		this.LAP = LPR + RWS;
+		this.LAP = (char) (LPR + RWS);
 		while (!window.isEmpty()){
 			packets.add(window.poll());
 		}
@@ -121,7 +123,7 @@ public class DOPEClientSocket extends DOPESocket {
 	private boolean contains(DOPEPacket packet){
 		/* check for duplicate packets */
 		for (Iterator<DOPEPacket> it = window.iterator(); it.hasNext();){
-			if (packet.compareTo(it.next) == 0){
+			if (packet.compareTo(it.next()) == 0){
 				return true;
 			}
 		}

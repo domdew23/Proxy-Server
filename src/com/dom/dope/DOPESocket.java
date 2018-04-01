@@ -65,29 +65,38 @@ public class DOPESocket {
 		DatagramPacket dgPacket = new DatagramPacket(buffer, buffer.length);
 		connection.receive(dgPacket);
 
-		byte[] packet = Arrays.copyOfRange(buffer, 0, dgPacket.getLength());
+		byte[] bytes = Arrays.copyOfRange(buffer, 0, dgPacket.getLength());
 		
 		System.out.println("Received packet of size: " + dgPacket.getLength());
-		if (!addressSet) {
-			address = dgPacket.getAddress();
-			senderPort = dgPacket.getPort();
-			addressSet = true;
-		}
-		return (new DOPEPacket(packet));
+		
+		if (!addressSet) 
+			setSenderData(dgPacket.getAddress(), dgPacket.getPort());
+		
+		return (new DOPEPacket(bytes));
 	}
 
 	private DatagramPacket makePacket(DOPEPacket packet) throws IOException {
 		byte[] bytes = packet.getPacket();	
 		DatagramPacket dgPacket;
 		
-		if (senderPort != -1) dgPacket = new DatagramPacket(bytes, bytes.length, address, senderPort);
-		else dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
+		if (senderPort != -1) 
+			dgPacket = new DatagramPacket(bytes, bytes.length, address, senderPort);
+		else 
+			dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
 		
 		return dgPacket;
 	}
 
-	public void setAddress(InetAddress address){
+	public void setSenderData(InetAddress address, int port){
 		this.address = address;
+		this.senderPort = port;
+		this.addressSet = true;
+	}
+
+	public void resetSenderData(){
+		this.address = null;
+		this.senderPort = -1;
+		this.addressSet = false;
 	}
 
 	public void close() throws IOException {

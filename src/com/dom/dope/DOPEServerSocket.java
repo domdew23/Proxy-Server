@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 
 public class DOPEServerSocket extends DOPESocket {
 	
-	private int SWS; /* Send window size (# of unacked packets) */
+	private byte SWS; /* Send window size (# of unacked packets) */
 	private char LAR; /* SeqNum of Last Ack Received */ 
 	private char LPS; /* SeqNum of Last Packet Sent */
 
@@ -22,35 +22,58 @@ public class DOPEServerSocket extends DOPESocket {
 		currentSeqNum = 1;
 		
 		if (Control.slidingWindow) {
-			this.SWS = 4;
+			this.SWS = Control.WINDOW_SIZE;
 			this.LAR = 0;
 			this.LPS = 0;
 			this.window = new PriorityQueue<DOPEPacket>(SWS);
-			sendSlidingWindow();
+			sendSlidingWindow(null);
 		} else {
 			send(packets[currentSeqNum - 1]);
 		}
 	}
 
-	public void sendSlidingWindow() throws IOException {
-		for (int i = 0; i < SWS; i++){
-			DOPEPacket packet = packets[i + currentSeqNum - 1];
+	public void sendStopAndWait(DOPEPacket ackPacket) throws IOException {
+		if (currentSeqNum == ackPacket.getSequenceNumber()){
+			/* recieved next packet in the chain */
+			currentSeqNum++;
+			send(packets[currentSeqNum - 1]);
+		}
+	}
+
+	public void sendSlidingWindow(DOPEPacket ackPacket) throws IOException {
+		if (ackPacket != null){
+			SWS = ackPacket.getAdvertisedWindow();
+			LAR = ackPacket.getSequenceNumber();
+			shiftWindow();
+		}
+
+		for (int i = LAR; i < SWS + LAR; i++){
+			DOPEPacket packet = packets[i];
 			send(packet);
+
 			window.add(packet);
+			LPS = packet.getSequenceNumber();
 		}
 	}
 
 	public void continueTransfer(DOPEPacket ackPacket) throws IOException {
-		if (Control.slidingWindow){
+		if (currentSeqNum == packets.length) {
+			/* done with transfer */
+			resetSenderData();
+			return;
+		}
 
-		} else {
-			if (currentSeqNum == packets.length){
-				addressSet = false;
-				senderPort = -1;
-			} else if (currentSeqNum == ackPacket.getSequenceNumber()){
-				/* recieved next packet in the chain */
-				currentSeqNum++;
-				send(packets[currentSeqNum - 1]);
+		if (Control.slidingWindow)
+			sendSlidingWindow(ackPacket);
+		else
+			sendStopAndWait(ackPacket);	
+	}
+
+	private void shiftWindow(){
+		for (;;){
+			DOPEPacket packet = window.poll();
+			if (packet.getSequenceNumber() == LAR){
+				break;
 			}
 		}
 	}

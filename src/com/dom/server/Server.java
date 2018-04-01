@@ -33,7 +33,8 @@ public class Server {
 			ex.printStackTrace();
 		} finally {
 			try {
-				connection.close();
+				if (connection != null)
+					connection.close();
 			} catch (IOException ex){
 				ex.printStackTrace();
 			}
