@@ -49,49 +49,32 @@ public class Client {
 
 		try {
 			address = InetAddress.getByName(HOST);
-			DOPEClientSocket connection = new DOPEClientSocket(PORT, address);
-			System.out.println("Created connection.");
+			connection = new DOPEClientSocket(PORT, address);
+			connection.send(new DOPEPacket(Control.RQ_OP_CODE, link.getBytes("UTF-8"))); /* send request for to server for a image given a link */
 
-			byte[] linkBytes = link.getBytes("UTF-8");
-			System.out.println("Sending link: " + new String(linkBytes) + " | size: " + linkBytes.length);
+			ArrayList<DOPEPacket> packets;
 
-			DOPEPacket request = new DOPEPacket(Control.RQ_OP_CODE, linkBytes);
-			connection.send(request);
-
-			DOPEPacket packet;
-			ArrayList<DOPEPacket> packets = new ArrayList<DOPEPacket>();
-
-			int len = 0;
-			for (; (packet = connection.receive()).getDataLength() == Control.MAX_SIZE_IPV4; len += packet.getDataLength()){
-				packets.add(packet);
-				sendAck(packet, connection);
+			if (Control.slidingWindow){
+				packets = connection.slidingWindow();
+			} else {
+				packets = connection.stopAndWait();
 			}
 
-			packets.add(packet);
-			len+= packet.getDataLength();
-			sendAck(packet, connection);
+			display(buffer(packets));
 
-			display(buffer(packets, len));
-
-		} catch (Exception ex){
+		} catch (IOException ex){
 			ex.printStackTrace();
 		} finally {
 			if (connection != null) connection.close();
 		}
 	}
 
-	private static byte[] buffer(ArrayList<DOPEPacket> packets, int len){
-		ByteBuffer buffer = ByteBuffer.allocate(len);
+	private static byte[] buffer(ArrayList<DOPEPacket> packets){
+		ByteBuffer buffer = ByteBuffer.allocate(Control.dataLength);
 		for (int i = 0; i < packets.size(); i++){
 			buffer.put(packets.get(i).getData());
 		}
 		return buffer.array();
-	}
-
-	private static void sendAck(DOPEPacket packet, DOPEClientSocket connection) throws IOException {
-		DOPEPacket ack = new DOPEPacket(Control.ACK_OP_CODE, packet.getSequenceNumber());
-		connection.send(ack);
-		System.out.println("Sent ack:\n" + ack);	
 	}
 
 	private static void parseArgs(String[] args){

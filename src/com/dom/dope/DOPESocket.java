@@ -60,24 +60,6 @@ public class DOPESocket {
 		System.out.println("Packet sent.");
 	}
 
-	public void sendSlidingWindow() throws IOException {
-		for (int i = 0; i < 4; i++){
-			DOPEPacket packet = packets[i + currentSeqNum - 1];
-			send(packet);
-			window.add(packet);
-		}
-	}
-
-	private DatagramPacket makePacket(DOPEPacket packet) throws IOException {
-		byte[] bytes = packet.getPacket();	
-		DatagramPacket dgPacket;
-		
-		if (senderPort != -1) dgPacket = new DatagramPacket(bytes, bytes.length, address, senderPort);
-		else dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
-		
-		return dgPacket;
-	}
-
 	public DOPEPacket receive() throws IOException {
 		byte[] buffer = new byte[Control.MAX_PACKET_LENGTH];
 		DatagramPacket dgPacket = new DatagramPacket(buffer, buffer.length);
@@ -92,6 +74,16 @@ public class DOPESocket {
 			addressSet = true;
 		}
 		return (new DOPEPacket(packet));
+	}
+
+	private DatagramPacket makePacket(DOPEPacket packet) throws IOException {
+		byte[] bytes = packet.getPacket();	
+		DatagramPacket dgPacket;
+		
+		if (senderPort != -1) dgPacket = new DatagramPacket(bytes, bytes.length, address, senderPort);
+		else dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
+		
+		return dgPacket;
 	}
 
 	public void setAddress(InetAddress address){

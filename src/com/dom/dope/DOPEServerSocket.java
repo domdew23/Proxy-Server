@@ -1,17 +1,13 @@
 package com.dom.dope;
 
 import java.net.InetAddress;
-
 import java.io.IOException;
-
 import com.dom.util.Control;
-
-import java.util.Arrays;
 import java.util.PriorityQueue;
 
 public class DOPEServerSocket extends DOPESocket {
 	
-	private int SWS; /* Send window size */
+	private int SWS; /* Send window size (# of unacked packets) */
 	private char LAR; /* SeqNum of Last Ack Received */ 
 	private char LPS; /* SeqNum of Last Packet Sent */
 
@@ -36,6 +32,14 @@ public class DOPEServerSocket extends DOPESocket {
 		}
 	}
 
+	public void sendSlidingWindow() throws IOException {
+		for (int i = 0; i < SWS; i++){
+			DOPEPacket packet = packets[i + currentSeqNum - 1];
+			send(packet);
+			window.add(packet);
+		}
+	}
+
 	public void continueTransfer(DOPEPacket ackPacket) throws IOException {
 		if (Control.slidingWindow){
 
@@ -47,10 +51,6 @@ public class DOPEServerSocket extends DOPESocket {
 				/* recieved next packet in the chain */
 				currentSeqNum++;
 				send(packets[currentSeqNum - 1]);
-			} else {
-				/* recieved wrong packet in the chain */
-				System.out.println("Received wrong packet in chain - should not happen for stop and wait");
-				System.exit(0);
 			}
 		}
 	}
