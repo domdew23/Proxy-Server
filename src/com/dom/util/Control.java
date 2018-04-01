@@ -19,6 +19,7 @@ public class Control {
  
 	public static final int MAX_SIZE_IPV4 = 512;
 	public static final int MAX_PACKET_LENGTH = MAX_SIZE_IPV4 + DOPEPacket.HEADER_LENGTH;
+	public static final double DROP_RATE = 0.1;
 	public static int dataLength;
 
 	public static boolean IPv4 = true;

@@ -10,6 +10,7 @@ import java.io.IOException;
 import com.dom.util.Control;
 
 import java.util.Arrays;
+import java.util.Random;
 import java.util.PriorityQueue;
 
 /* Dom's Original Protocol Extended */
@@ -84,6 +85,12 @@ public class DOPESocket {
 			dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
 		
 		return dgPacket;
+	}
+
+	protected void simulateDrop() throws SocketTimeoutException {
+		if (new Random().nextDouble() < Control.DROP_RATE && Control.dropPackets){
+			throw new SocketTimeoutException();
+		}
 	}
 
 	public void setSenderData(InetAddress address, int port){

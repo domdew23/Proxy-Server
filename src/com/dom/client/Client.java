@@ -9,6 +9,7 @@ import com.dom.util.Control;
 import javax.swing.JLabel;
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -36,11 +37,12 @@ Window size is number of packets yet to be acked
 public class Client {
 	private static final int PORT = 2703;
 	private static final String HOST = "pi.cs.oswego.edu";
-	private static final String LINK = "http://www.smashbros.com/images/og/link.jpg";
+	private static final String link = "http://www.smashbros.com/images/og/link.jpg";
 	private static InetAddress address;
 	private static DOPEClientSocket connection;
 	
 	public static void main(String[] args){
+		//String link = JOptionPane.showInputDialog("Enter a image link: ");
 		long start = System.currentTimeMillis();
 		Control.parseArgs(args);
 		Control.isReceiver = true;
@@ -48,7 +50,7 @@ public class Client {
 		try {
 			address = InetAddress.getByName(HOST);
 			connection = new DOPEClientSocket(PORT, address);
-			connection.send(new DOPEPacket(Control.RQ_OP_CODE, LINK.getBytes("UTF-8"))); /* send request for to server for a image given a link */
+			connection.send(new DOPEPacket(Control.RQ_OP_CODE, link.getBytes("UTF-8"))); /* send request for to server for a image given a link */
 
 			ArrayList<DOPEPacket> packets;
 
@@ -83,11 +85,11 @@ public class Client {
 
 	private static void display(byte[] bytes) throws IOException {
 		JFrame frame = new JFrame();
-		ImageIcon icon = new ImageIcon(ImageIO.read(new ByteArrayInputStream(bytes)));
+		ImageIcon icon = new ImageIcon(ImageIO.read(new ByteArrayInputStream(bytes)).getScaledInstance(800, 800, Image.SCALE_SMOOTH));
 		JLabel lbl = new JLabel();
 		lbl.setIcon(icon);
 		frame.add(lbl);
-		frame.setSize(1500, 1500);
+		frame.setSize(800, 800);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
