@@ -41,12 +41,16 @@ public class DOPEClientSocket extends DOPESocket {
 		for (;;){
 			try {
 				packet = receive();
+				simulateDrop();
 				len += packet.getDataLength();
 				packets.add(packet);
 				sendAck(packet);
 				if (packet.getDataLength() < Control.MAX_SIZE_IPV4) break;
 				lastPacket = packet;
 			} catch (SocketTimeoutException e){
+				System.out.println("Timed Out. ---------------------------------------------------");
+				if (lastPacket == null)
+					continue;
 				sendAck(lastPacket);
 			}
 		}
@@ -90,9 +94,13 @@ public class DOPEClientSocket extends DOPESocket {
 						shiftWindow(packets);
 					}
 				}
-				if (packet.getDataLength() < Control.MAX_SIZE_IPV4) break;
+				if (packet.getDataLength() < Control.MAX_SIZE_IPV4){
+					shiftWindow(packets);
+					sendAck(packet.getSequenceNumber(), (byte) 0);
+					break;
+				}
 			} catch (SocketTimeoutException ex){
-				System.out.println("Timed Out.");
+				System.out.println("Timed Out. ---------------------------------------------------");
 				advertisedWindow = (byte) (RWS - window.size());
 				sendAck(seqNumToAck, advertisedWindow);
 			}

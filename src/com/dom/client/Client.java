@@ -37,12 +37,12 @@ Window size is number of packets yet to be acked
 public class Client {
 	private static final int PORT = 2703;
 	private static final String HOST = "pi.cs.oswego.edu";
-	private static final String link = "http://www.smashbros.com/images/og/link.jpg";
+	//private static final String link = "http://www.smashbros.com/images/og/link.jpg";
 	private static InetAddress address;
 	private static DOPEClientSocket connection;
 	
 	public static void main(String[] args){
-		//String link = JOptionPane.showInputDialog("Enter a image link: ");
+		String link = JOptionPane.showInputDialog("Enter a image link: ");
 		long start = System.currentTimeMillis();
 		Control.parseArgs(args);
 		Control.isReceiver = true;
@@ -84,12 +84,23 @@ public class Client {
 	}
 
 	private static void display(byte[] bytes) throws IOException {
+		int width, height;
+		BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
+		
+		if (img.getWidth() > 1000 || img.getHeight() > 1000){
+			width=img.getWidth()/2;
+			height=img.getHeight()/2;
+		} else {
+			width=img.getWidth();
+			height=img.getHeight();
+		}
+
 		JFrame frame = new JFrame();
-		ImageIcon icon = new ImageIcon(ImageIO.read(new ByteArrayInputStream(bytes)).getScaledInstance(800, 800, Image.SCALE_SMOOTH));
+		ImageIcon icon = new ImageIcon(img.getScaledInstance(width, height, Image.SCALE_SMOOTH));
 		JLabel lbl = new JLabel();
 		lbl.setIcon(icon);
 		frame.add(lbl);
-		frame.setSize(800, 800);
+		frame.setSize(width, height);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
