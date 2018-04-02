@@ -36,14 +36,15 @@ public class Control {
 	public static byte[] getImage(DOPEPacket packet) throws IOException {
 		byte[] linkBytes = packet.getData();
 		String link = new String(linkBytes).trim();
+		String fileName = link.replace("/", "");
 		System.out.println("Received link: " + link);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream input = null;
 
-		if (inCache(link)){
+		if (inCache(fileName)){
 			System.out.println("Getting image from cache.");
-			input = new FileInputStream("cache/" + link + ".jpg");
+			input = new FileInputStream("cache/" + fileName);
 			cache = false;
 		} else{
 			URL url = new URL(link);
@@ -58,7 +59,7 @@ public class Control {
 			out.write(buffer, 0, len);
 
 		if (cache)
-			cacheImage(out.toByteArray(), link);
+			cacheImage(out.toByteArray(), fileName);
 
 		out.close();
 		input.close();
@@ -66,7 +67,7 @@ public class Control {
 	}
 
 	public static void cacheImage(byte[] bytes, String fileName) throws IOException {
-		OutputStream output = new FileOutputStream("cache/" + fileName + ".jpg");
+		OutputStream output = new FileOutputStream("cache/" + fileName);
 		output.write(bytes);
 		output.close();
 	}
