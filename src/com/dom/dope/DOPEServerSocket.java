@@ -39,6 +39,9 @@ public class DOPEServerSocket extends DOPESocket {
 			/* recieved next packet in the chain */
 			currentSeqNum++;
 			send(packets[currentSeqNum - 1]);
+		} else {
+			/* packet was dropped resend */
+			send(packets[ackPacket.getSequenceNumber()]);
 		}
 	}
 
@@ -47,9 +50,17 @@ public class DOPEServerSocket extends DOPESocket {
 			SWS = ackPacket.getAdvertisedWindow();
 			LAR = ackPacket.getSequenceNumber();
 			shiftWindow();
+			if (ackPacket.getAdvertisedWindow() == 0){
+				resetSenderData();
+				return;
+			}
 		}
 
 		for (int i = LAR; i < SWS + LAR; i++){
+			if (i == packets.length){
+				resetSenderData();
+				return;
+			}
 			DOPEPacket packet = packets[i];
 			send(packet);
 			System.out.println("Sent packet: " + i);
