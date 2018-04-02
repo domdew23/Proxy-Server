@@ -63,7 +63,6 @@ public class DOPEPacket implements Comparable<DOPEPacket> {
 
 	/* make a new sliding window ack packet */
 	public DOPEPacket(byte opCode, char seqNum, byte advertisedWindow){
-		System.out.println("Making new ack packet.");
 		this.opCode = opCode;
 		this.seqNum = seqNum;
 		this.advertisedWindow = advertisedWindow;

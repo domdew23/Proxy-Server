@@ -1,1 +1,1 @@
-java -Djava.net.preferIPv4Stack=true -cp bin com.dom.client.Client
+java -Djava.net.preferIPv6Addresses=true -cp bin com.dom.client.Client

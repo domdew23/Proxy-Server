@@ -82,8 +82,9 @@ public class DOPESocket {
 		return dgPacket;
 	}
 
-	protected void simulateDrop() throws SocketTimeoutException {
+	protected void simulateDrop() throws SocketTimeoutException, InterruptedException {
 		if (new Random().nextDouble() < Control.DROP_RATE && Control.dropPackets){
+			Thread.sleep(2000);
 			throw new SocketTimeoutException();
 		}
 	}

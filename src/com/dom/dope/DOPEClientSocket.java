@@ -52,6 +52,8 @@ public class DOPEClientSocket extends DOPESocket {
 				if (lastPacket == null)
 					continue;
 				sendAck(lastPacket);
+			} catch (InterruptedException e){
+
 			}
 		}
 
@@ -103,6 +105,8 @@ public class DOPEClientSocket extends DOPESocket {
 				System.out.println("Timed Out. ---------------------------------------------------");
 				advertisedWindow = (byte) (RWS - window.size());
 				sendAck(seqNumToAck, advertisedWindow);
+			} catch (InterruptedException e){
+
 			}
 		}
 
