@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class DOPEClientSocket extends DOPESocket {
-	
+
 	private byte RWS; /* Receive Window Size (# of out-of-order packets) */
 	private char LAP; /* SeqNum of Largest acceptable packet */
 	private char LPR; /* SeqNum of Last Packet Received */
@@ -58,11 +58,11 @@ public class DOPEClientSocket extends DOPESocket {
 		}
 
 		Control.dataLength = len;
-		
+
 		return packets;
 	}
 
-	public ArrayList<DOPEPacket> slidingWindow() throws IOException {		
+	public ArrayList<DOPEPacket> slidingWindow() throws IOException {
 		this.RWS = Control.WINDOW_SIZE;
 		this.seqNumToAck = 0;
 		this.LPR = seqNumToAck;
@@ -115,18 +115,18 @@ public class DOPEClientSocket extends DOPESocket {
 		return packets;
 	}
 
+	/* send a stop and wait ack */
 	private void sendAck(DOPEPacket packet) throws IOException {
-		/* send a stop and wait ack */
 		DOPEPacket ack = new DOPEPacket(Control.ACK_OP_CODE, packet.getSequenceNumber());
 		send(ack);
-		System.out.println("Sent ack:\n" + ack);	
+		System.out.println("Sent ack:\n" + ack);
 	}
 
+	/* send a sliding window ack */
 	private void sendAck(char seqNum, byte advertisedWindow) throws IOException {
-		/* send a sliding window ack */
 		DOPEPacket ack = new DOPEPacket(Control.ACK_OP_CODE, seqNum, advertisedWindow);
 		send(ack);
-		System.out.println("Sent ack:\n" + ack);	
+		System.out.println("Sent ack:\n" + ack);
 	}
 
 	private void shiftWindow(ArrayList<DOPEPacket> packets){
@@ -137,8 +137,8 @@ public class DOPEClientSocket extends DOPESocket {
 		}
 	}
 
+	/* check for duplicate packets */
 	private boolean contains(DOPEPacket packet){
-		/* check for duplicate packets */
 		for (Iterator<DOPEPacket> it = window.iterator(); it.hasNext();){
 			if (packet.compareTo(it.next()) == 0){
 				return true;
