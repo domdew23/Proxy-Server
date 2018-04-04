@@ -1,6 +1,9 @@
 # Proxy Server
 
-This is a client server application where the Client sends a URL (at this time the proxy server only supports links to jpg images), and the Proxy Server will fetch the image on the Client's behalf, cache it and then send it back to the Client. The application uses Dom's Original Protocol Extended (DOPE) to transfer the image from the Server to the Client. DOPE is an extension of the protocol [TFTP](http://www.ietf.org/rfc/rfc1350.txt) which adds additional functionality to improve performance.
+This is a client server application where the Client sends a URL (at this time the proxy server only supports links to jpg images), and the Proxy Server will fetch the image on the Client's behalf, cache it and then send it back to the Client. The application uses Dom's Original Protocol Extended (DOPE) to transfer the image from the Server to the Client. DOPE is an extension of the protocol [TFTP](http://www.ietf.org/rfc/rfc1350.txt) which adds additional functionality to improve performance. Below is a graph illustrating the difference in throughput using a "Stop and Wait" type protocol versus using a TCP-style "Sliding Window" type protocol.
+
+<h1>Stop and Wait vs Sliding Window</h1><br>
+<img src="graphs/stopAndWait_vs_slidingWindow_ipv4_nodrops.png"><br>
 
 ## Getting Started
 
@@ -35,7 +38,7 @@ To run the proxy server you need to choose a host as your Server for whom you wa
 
 ### Prerequisites
 
-To run this game you must have Java installed on both the Client and Server.
+To run this application you must have Java installed on both the Client and Server.
 * [Click here to download Java](https://java.com/en/download/)
 * [Click here to download the JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [Click here to download the JRE](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)

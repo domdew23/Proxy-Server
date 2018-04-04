@@ -6,9 +6,9 @@ import com.dom.util.Control;
 import java.util.PriorityQueue;
 
 public class DOPEServerSocket extends DOPESocket {
-	
-	private byte SWS; /* Send window size (# of unacked packets) */
-	private char LAR; /* SeqNum of Last Ack Received */ 
+
+	private byte SWS; /* Send Window Size - (# of unacked packets) */
+	private char LAR; /* SeqNum of Last Ack Received */
 	private char LPS; /* SeqNum of Last Packet Sent */
 	private DOPEPacket[] packets;
 
@@ -21,7 +21,7 @@ public class DOPEServerSocket extends DOPESocket {
 		byte[] bytes = Control.getImage(requestPacket);
 		packets = Control.split(bytes);
 		currentSeqNum = 1;
-		
+
 		if (Control.slidingWindow) {
 			System.out.println("Starting sliding window.");
 			this.SWS = Control.WINDOW_SIZE;
@@ -80,7 +80,7 @@ public class DOPEServerSocket extends DOPESocket {
 		if (Control.slidingWindow)
 			sendSlidingWindow(ackPacket);
 		else
-			sendStopAndWait(ackPacket);	
+			sendStopAndWait(ackPacket);
 	}
 
 	private void shiftWindow(){

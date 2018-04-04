@@ -12,7 +12,7 @@ import java.util.Iterator;
 
 public class DOPEClientSocket extends DOPESocket {
 
-	private byte RWS; /* Receive Window Size (# of out-of-order packets) */
+	private byte RWS; /* Receive Window Size - (# of out-of-order packets) */
 	private char LAP; /* SeqNum of Largest acceptable packet */
 	private char LPR; /* SeqNum of Last Packet Received */
 	private char seqNumToAck; /* Largest SeqNum not yet acked - all packets with SeqNum <= SeqNumToAck have been received */
