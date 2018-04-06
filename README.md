@@ -1,8 +1,8 @@
 # Proxy Server
 
-This is a client server application where the Client sends a URL (at this time the proxy server only supports links to jpg images), and the Proxy Server will fetch the image on the Client's behalf, cache it and then send it back to the Client. The application uses Dom's Original Protocol Extended (DOPE) to transfer the image from the Server to the Client. DOPE is an extension of the protocol [TFTP](http://www.ietf.org/rfc/rfc1350.txt) which adds additional functionality to improve performance. Below is a graph illustrating the difference in throughput using a "Stop and Wait" type protocol versus using a TCP-style "Sliding Window" type protocol.
+This is a client server application where the Client sends a URL (at this time the proxy server only supports links to jpg images), and the Proxy Server will fetch the image on the Client's behalf, cache it and then send it back to the Client. The application uses Dom's Original Protocol Extended (DOPE) to transfer the image from the Server to the Client. DOPE is an extension of the protocol [TFTP](http://www.ietf.org/rfc/rfc1350.txt) which adds additional functionality to improve performance. The DOPE Protocol is implemented on top of UDP. Below is a graph illustrating the difference in throughput using a "Stop and Wait" type protocol versus using a TCP-style "Sliding Window" type protocol. The time is over the course of 50 transfers of a 1.3 megabyte file and time is put on a logarithmic base 10 scale. The default is for the application to using sliding windows, but running both the Client and Server with the command line argument '-sw' will run stop and wait.
 
-<h1>Stop and Wait vs Sliding Window</h1><br>
+<h2>Stop and Wait vs Sliding Window</h2><br>
 <img src="graphs/stopAndWait_vs_slidingWindow_ipv4_nodrops.png"><br>
 
 ## Getting Started
@@ -11,14 +11,14 @@ To run the proxy server you need to choose a host as your Server for whom you wa
 
 ### Run the Server:
 #### Windows:
-* > run_server.bat
+* run_server.bat
 
 #### Mac/Linux:
 * $ java -cp bin com.dom.server.Server
 
 ### Run the Client:
 #### Windows:
-* > run_client.bat
+* run_client.bat
 
 #### Mac/Linux:
 * $ java -cp bin com.dom.client.Client

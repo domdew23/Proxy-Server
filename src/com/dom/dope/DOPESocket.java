@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.PriorityQueue;
 
-/* Dom's Original Protocol Extended */
+/* Dom's Original Protocol Extended (DOPE) */
 
 /*
 A packet less than 512 (Max bytes per packet) signals termination of transfer
@@ -30,7 +30,7 @@ Each packet has associated with it the source TID and dest TID - handed to UDP a
 */
 
 public class DOPESocket {
-	
+
 	protected int port, senderPort=-1;
 	protected InetAddress address;
 	protected char currentSeqNum;
@@ -63,22 +63,22 @@ public class DOPESocket {
 		DatagramPacket dgPacket = new DatagramPacket(buffer, buffer.length);
 		connection.receive(dgPacket);
 		byte[] bytes = Arrays.copyOfRange(buffer, 0, dgPacket.getLength());
-				
-		if (!addressSet) 
+
+		if (!addressSet)
 			setSenderData(dgPacket.getAddress(), dgPacket.getPort());
-		
+
 		return (new DOPEPacket(bytes));
 	}
 
 	private DatagramPacket makePacket(DOPEPacket packet) throws IOException {
-		byte[] bytes = packet.getPacket();	
+		byte[] bytes = packet.getPacket();
 		DatagramPacket dgPacket;
-		
-		if (senderPort != -1) 
+
+		if (senderPort != -1)
 			dgPacket = new DatagramPacket(bytes, bytes.length, address, senderPort);
-		else 
+		else
 			dgPacket = new DatagramPacket(bytes, bytes.length, address, port);
-		
+
 		return dgPacket;
 	}
 

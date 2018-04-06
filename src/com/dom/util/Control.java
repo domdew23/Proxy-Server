@@ -13,19 +13,24 @@ import java.util.Arrays;
 import com.dom.dope.DOPEPacket;
 
 public class Control {
-	
+
+	/*
+	A class that holds the settings for the application and contains some methods the Server relies on to grab an image,
+	cache it, and split the up the image up into packets.
+	*/
+
 	public static final byte RQ_OP_CODE = 0;
 	public static final byte DATA_OP_CODE = 1;
 	public static final byte ACK_OP_CODE = 2;
 	public static final byte WINDOW_SIZE = 4;
- 
+
 	public static final int MAX_SIZE_IPV4 = 512;
 	public static final int MAX_PACKET_LENGTH = MAX_SIZE_IPV4 + DOPEPacket.HEADER_LENGTH;
 	public static final double DROP_RATE = 0.01;
 	public static int dataLength;
 
 	public static boolean IPv4 = true;
-	public static boolean slidingWindow = false;
+	public static boolean slidingWindow = true;
 	public static boolean dropPackets = false;
 	public static boolean isReceiver = false;
 	private static boolean cache = false;
@@ -38,7 +43,7 @@ public class Control {
 		String link = new String(linkBytes).trim();
 		String fileName = link.replace("/", "");
 		System.out.println("Received link: " + link);
-		
+
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream input = null;
 
@@ -109,7 +114,7 @@ public class Control {
 	public static void parseArgs(String[] args){
 		for (int i = 0; i < args.length; i++){
 			switch(args[i]){
-				case "-sw": slidingWindow = true; break;
+				case "-sw": slidingWindow = false; break;
 				case "-d": dropPackets = true; break;
 				default: System.out.println("Invalid args."); System.exit(0);
 			}
